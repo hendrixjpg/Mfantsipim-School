@@ -1,6 +1,7 @@
 import React from 'react';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Navbar, Footer, BottomNav } from '@/src/components/Layout';
 import Home from '@/src/pages/Home';
 import About from '@/src/pages/About';
@@ -60,6 +61,7 @@ export default function App() {
         <Footer />
         <BottomNav />
         <ChatBot />
+        <SpeedInsights />
       </div>
     </Router>
   );
