@@ -6,7 +6,7 @@ export const SCHOOL_INFO = {
   location: "Cape Coast, Ghana",
   colors: {
     red: "#E11D48",
-    black: "#000000",
+    black: "#74070E",
     white: "#FFFFFF",
   },
   contact: {
