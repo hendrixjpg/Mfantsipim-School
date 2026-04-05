@@ -48,21 +48,24 @@ export default function Achievements() {
   };
 
   if (loading) return (
-    <div className="bg-white/5 rounded-3xl p-8 border border-white/10 flex flex-col items-center justify-center h-96">
+    <div className="glass rounded-[32px] p-8 flex flex-col items-center justify-center h-96">
       <Loader2 className="animate-spin text-red-600 mb-4" size={32} />
-      <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Loading Achievements...</p>
+      <p className="text-gray-500 font-black uppercase tracking-widest text-[10px]">Loading Records...</p>
     </div>
   );
 
   return (
-    <div>
-      <div className="flex items-center space-x-4 mb-8">
-        <div className="p-3 bg-red-600/20 rounded-2xl">
+    <div className="relative">
+      <div className="absolute inset-0 scanline opacity-[0.02] pointer-events-none" />
+      <div className="flex items-center space-x-6 mb-12">
+        <div className="w-16 h-16 glass rounded-2xl flex items-center justify-center neon-red relative">
+          <div className="hud-corner hud-corner-tr -top-1 -right-1" />
+          <div className="hud-corner hud-corner-bl -bottom-1 -left-1" />
           <Star className="text-red-600" size={32} />
         </div>
         <div>
-          <h2 className="text-2xl font-black uppercase tracking-tight text-white">Recent Achievements</h2>
-          <p className="text-gray-500 text-sm font-bold uppercase tracking-widest">Excellence in all fields</p>
+          <h2 className="text-4xl font-black uppercase tracking-tighter text-white leading-none mb-2">Achievements</h2>
+          <p className="text-gray-500 text-[9px] font-mono font-black uppercase tracking-[0.3em]">LEGACY_ARCHIVE_v1.0.4</p>
         </div>
       </div>
 
@@ -77,34 +80,44 @@ export default function Achievements() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
-              className="flex items-start space-x-6 p-6 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+              className="flex items-start space-x-6 p-8 rounded-[32px] glass glass-hover relative group overflow-hidden"
             >
-              <div className={`p-4 rounded-2xl bg-black/50 ${color}`}>
+              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-red-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className={`p-5 rounded-2xl glass ${color} group-hover:scale-110 transition-transform duration-500 relative`}>
+                <div className="hud-corner hud-corner-tl w-2 h-2 opacity-0 group-hover:opacity-100 transition-opacity" />
                 <Icon size={32} />
               </div>
-              <div>
-                <div className="flex items-center space-x-2 mb-1">
-                  <span className="text-red-600 font-black text-sm">{achievement.year}</span>
-                  <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
-                  <h3 className="text-lg font-bold text-white">{achievement.title}</h3>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-red-600 font-mono font-black text-sm tracking-tighter">[{achievement.year}]</span>
+                    <div className="w-1 h-1 bg-gray-800 rounded-full" />
+                    <span className="text-[9px] font-mono text-gray-500 font-black uppercase tracking-[0.2em]">{achievement.category}</span>
+                  </div>
                 </div>
-                <p className="text-gray-400 text-sm leading-relaxed">
+                <h3 className="text-2xl font-black text-white mb-3 tracking-tight leading-tight group-hover:text-red-500 transition-colors">
+                  {achievement.title}
+                </h3>
+                <p className="text-gray-400 text-sm leading-relaxed font-medium">
                   {achievement.description}
                 </p>
               </div>
             </motion.div>
           );
         }) : (
-          <div className="text-center py-10 text-gray-500 font-bold uppercase tracking-widest text-xs">
-            No achievements data yet
+          <div className="text-center py-20 glass rounded-[32px] border-dashed border-white/10">
+            <Award size={40} className="text-gray-800 mx-auto mb-4" />
+            <p className="text-gray-500 font-black uppercase tracking-widest text-[10px]">
+              No records found
+            </p>
           </div>
         )}
       </div>
       
       <motion.button
-        whileHover={{ scale: 1.02 }}
+        whileHover={{ scale: 1.02, y: -2 }}
         whileTap={{ scale: 0.98 }}
-        className="w-full mt-8 py-4 border-2 border-white/10 hover:border-red-600/50 rounded-2xl text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-white transition-all"
+        className="w-full mt-10 py-5 glass glass-hover rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 hover:text-white transition-all shadow-xl neon-red-hover glitch-hover"
       >
         View Hall of Fame
       </motion.button>

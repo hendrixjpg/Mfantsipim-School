@@ -29,6 +29,16 @@ export interface UserProfile {
   displayName: string;
   role: 'admin' | 'alumni' | 'student' | 'guest';
   graduationYear?: string;
+  bio?: string;
+  occupation?: string;
+  location?: string;
+  linkedin?: string;
+  isPublic?: boolean;
+}
+
+export interface AlumniProfile extends UserProfile {
+  notable?: boolean;
+  achievements?: string[];
 }
 
 export interface ChatMessage {

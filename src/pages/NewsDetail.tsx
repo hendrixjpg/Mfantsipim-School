@@ -1,19 +1,90 @@
 import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Calendar, User, ArrowLeft, Loader2, Newspaper, Share2 } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/src/firebase';
-import { NewsItem } from '@/src/types';
+import { Calendar, User, ArrowLeft, Loader2, Newspaper, Share2, Trash2 } from 'lucide-react';
+import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { auth, db } from '@/src/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { NewsItem, UserProfile } from '@/src/types';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
+import ShareModal from '@/src/components/ShareModal';
+
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId: string | undefined;
+    email: string | null | undefined;
+    emailVerified: boolean | undefined;
+    isAnonymous: boolean | undefined;
+    tenantId: string | null | undefined;
+    providerInfo: {
+      providerId: string;
+      displayName: string | null;
+      email: string | null;
+      photoUrl: string | null;
+    }[];
+  }
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map(provider => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL
+      })) || []
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
 
 export default function NewsDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [news, setNews] = React.useState<NewsItem | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [isAdmin, setIsAdmin] = React.useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
 
   React.useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const docRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const profile = docSnap.data() as UserProfile;
+          setIsAdmin(profile.role === 'admin');
+        } else if (user.email === "seldogbey234@gmail.com") {
+          setIsAdmin(true);
+        }
+      } else {
+        setIsAdmin(false);
+      }
+    });
+
     const fetchNews = async () => {
       if (!id) return;
       try {
@@ -29,7 +100,21 @@ export default function NewsDetail() {
       }
     };
     fetchNews();
+
+    return () => unsubscribeAuth();
   }, [id]);
+
+  const handleDelete = async () => {
+    if (!id) return;
+    if (confirm('Are you sure you want to delete this article?')) {
+      try {
+        await deleteDoc(doc(db, 'news', id));
+        navigate('/news');
+      } catch (error) {
+        handleFirestoreError(error, OperationType.DELETE, `news/${id}`);
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -82,9 +167,20 @@ export default function NewsDetail() {
               <User size={16} className="mr-2 text-red-600" />
               Published by {news.author}
             </div>
-            <button className="ml-auto flex items-center hover:text-white transition-colors">
-              <Share2 size={16} className="mr-2" /> Share
+            <button 
+              onClick={() => setIsShareModalOpen(true)}
+              className="flex items-center hover:text-white transition-colors group"
+            >
+              <Share2 size={16} className="mr-2 group-hover:neon-red transition-all" /> Share
             </button>
+            {isAdmin && (
+              <button
+                onClick={handleDelete}
+                className="flex items-center text-red-500 hover:text-red-400 transition-colors"
+              >
+                <Trash2 size={16} className="mr-2" /> Delete
+              </button>
+            )}
           </div>
         </motion.div>
 
@@ -112,6 +208,13 @@ export default function NewsDetail() {
           </div>
         </motion.div>
       </article>
+
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        title={news.title}
+        url={window.location.href}
+      />
     </div>
   );
 }

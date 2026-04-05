@@ -39,36 +39,39 @@ export default function Leaderboard() {
   };
 
   if (loading) return (
-    <div className="bg-white/5 rounded-3xl p-8 border border-white/10 flex flex-col items-center justify-center h-96">
+    <div className="glass rounded-[32px] p-8 flex flex-col items-center justify-center h-96">
       <Loader2 className="animate-spin text-red-600 mb-4" size={32} />
-      <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">Syncing Leaderboard...</p>
+      <p className="text-gray-500 font-black uppercase tracking-widest text-[10px]">Syncing Data...</p>
     </div>
   );
 
   return (
-    <div className="bg-white/5 rounded-[32px] p-8 border border-white/10 shadow-2xl relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 blur-[100px] -z-10" />
+    <div className="glass rounded-[40px] p-8 shadow-2xl relative overflow-hidden group/board">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/5 blur-[100px] -z-10 group-hover/board:bg-red-600/10 transition-colors duration-700" />
+      <div className="absolute inset-0 scanline opacity-[0.03] pointer-events-none" />
       
-      <div className="flex items-center justify-between mb-10">
-        <div className="flex items-center space-x-5">
-          <div className="p-4 bg-red-600/20 rounded-2xl border border-red-600/20">
+      <div className="flex items-center justify-between mb-12">
+        <div className="flex items-center space-x-6">
+          <div className="w-16 h-16 glass rounded-2xl flex items-center justify-center neon-red relative">
+            <div className="hud-corner hud-corner-tl -top-1 -left-1" />
+            <div className="hud-corner hud-corner-br -bottom-1 -right-1" />
             <Trophy className="text-red-600" size={32} />
           </div>
           <div>
-            <h2 className="text-3xl font-black uppercase tracking-tight text-white leading-none mb-1">Leaderboard</h2>
-            <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em]">{SCHOOL_INFO.name} Houses</p>
+            <h2 className="text-4xl font-black uppercase tracking-tighter text-white leading-none mb-2">Leaderboard</h2>
+            <p className="text-gray-500 text-[9px] font-mono font-black uppercase tracking-[0.3em]">HOUSE_METRICS_SYNC_v4.2</p>
           </div>
         </div>
         <div className="hidden sm:block text-right">
-          <div className="text-xs font-black text-red-600 uppercase tracking-widest mb-1">Live Updates</div>
-          <div className="flex items-center justify-end space-x-2">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Active Session</span>
+          <div className="text-[9px] font-mono font-black text-red-600 uppercase tracking-widest mb-2">LIVE_DATA_STREAM</div>
+          <div className="flex items-center justify-end space-x-3 glass px-4 py-2 rounded-full">
+            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
+            <span className="text-[9px] text-gray-400 font-mono font-black uppercase tracking-widest">CONNECTED</span>
           </div>
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         <AnimatePresence mode="popLayout">
           {leaderboard.length > 0 ? leaderboard.map((item, i) => (
             <motion.div
@@ -84,56 +87,56 @@ export default function Leaderboard() {
                 opacity: { duration: 0.2 }
               }}
               className={cn(
-                "flex items-center justify-between p-5 rounded-2xl transition-all group relative overflow-hidden",
+                "flex items-center justify-between p-6 rounded-3xl transition-all group relative overflow-hidden",
                 i === 0 
-                  ? "bg-gradient-to-r from-red-600/20 to-transparent border border-red-600/30" 
-                  : "bg-black/40 border border-white/5 hover:border-white/10"
+                  ? "bg-gradient-to-r from-red-600/10 to-transparent border border-red-600/20 shadow-[0_0_30px_rgba(220,38,38,0.05)]" 
+                  : "glass glass-hover"
               )}
             >
               {i === 0 && (
-                <div className="absolute -right-4 -top-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Crown size={120} className="text-red-600 rotate-12" />
+                <div className="absolute -right-8 -top-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity pointer-events-none">
+                  <Crown size={160} className="text-red-600 rotate-12" />
                 </div>
               )}
 
-              <div className="flex items-center space-x-5 relative z-10">
+              <div className="flex items-center space-x-6 relative z-10">
                 <div className="w-12 h-12 flex items-center justify-center relative">
                   {i === 0 ? (
                     <motion.div
                       initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="absolute inset-0 bg-red-600/20 rounded-full blur-md"
+                      animate={{ scale: 1.5 }}
+                      className="absolute inset-0 bg-red-600/10 rounded-full blur-xl"
                     />
                   ) : null}
                   <span className={cn(
-                    "font-black text-2xl relative z-10",
-                    i === 0 ? "text-red-600" : "text-gray-600"
+                    "font-black text-3xl relative z-10 tracking-tighter",
+                    i === 0 ? "text-red-600" : "text-gray-700"
                   )}>
                     {i + 1}
                   </span>
                 </div>
 
-                <div className={cn("w-1.5 h-12 rounded-full", getHouseColor(item.houseName))}></div>
+                <div className={cn("w-2 h-12 rounded-full shadow-sm", getHouseColor(item.houseName))}></div>
                 
                 <div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-3 mb-1">
                     <h3 className={cn(
                       "font-black uppercase tracking-tight transition-colors",
-                      i === 0 ? "text-2xl text-white" : "text-lg text-gray-300 group-hover:text-white"
+                      i === 0 ? "text-3xl text-white" : "text-xl text-gray-400 group-hover:text-white"
                     )}>
                       {item.houseName}
                     </h3>
-                    {i === 0 && <Crown size={18} className="text-red-600" />}
+                    {i === 0 && <Crown size={20} className="text-red-600 neon-red" />}
                   </div>
                   <div className="flex items-center space-x-2">
                     {i < 3 ? (
-                      <Star size={12} className={cn(
+                      <Star size={10} className={cn(
                         i === 0 ? "text-red-600 fill-red-600" : "text-yellow-500 fill-yellow-500"
                       )} />
                     ) : (
-                      <div className="w-1 h-1 bg-gray-700 rounded-full" />
+                      <div className="w-1 h-1 bg-gray-800 rounded-full" />
                     )}
-                    <span className="text-[10px] text-gray-500 font-black uppercase tracking-widest">
+                    <span className="text-[9px] text-gray-500 font-black uppercase tracking-[0.2em]">
                       {i === 0 ? 'Current Champions' : i < 3 ? 'Elite Tier' : 'House Member'}
                     </span>
                   </div>
@@ -145,18 +148,18 @@ export default function Leaderboard() {
                   key={item.points}
                   initial={{ scale: 1.2, color: '#dc2626' }}
                   animate={{ scale: 1, color: '#ffffff' }}
-                  className="text-3xl font-black tracking-tighter"
+                  className="text-4xl font-black tracking-tighter leading-none mb-1"
                 >
                   {item.points.toLocaleString()}
                 </motion.div>
-                <div className="text-[10px] text-gray-500 font-black uppercase tracking-widest">Points</div>
+                <div className="text-[9px] text-gray-500 font-black uppercase tracking-[0.2em]">Points</div>
               </div>
             </motion.div>
           )) : (
-            <div className="text-center py-20 bg-black/20 rounded-3xl border border-dashed border-white/10">
+            <div className="text-center py-20 glass rounded-[32px] border-dashed border-white/10">
               <Star size={40} className="text-gray-800 mx-auto mb-4" />
-              <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">
-                Waiting for house scores...
+              <p className="text-gray-500 font-black uppercase tracking-widest text-[10px]">
+                Awaiting Data Stream...
               </p>
             </div>
           )}

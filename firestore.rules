@@ -53,8 +53,9 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated() &&
-        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-         (request.auth.token.email == "seldogbey234@gmail.com" && request.auth.token.email_verified == true));
+        (request.auth.token.email == "seldogbey234@gmail.com" ||
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
     }
 
     function isValidEmail(email) {
@@ -91,7 +92,14 @@ service cloud.firestore {
       return hasRequiredFields(['uid', 'email', 'role']) &&
              data.uid == request.auth.uid &&
              isValidEmail(data.email) &&
-             data.role in ['admin', 'alumni', 'student', 'guest'];
+             data.role in ['admin', 'alumni', 'student', 'guest'] &&
+             (data.displayName is string && data.displayName.size() < 100) &&
+             (!('graduationYear' in data) || (data.graduationYear is string && data.graduationYear.size() < 10)) &&
+             (!('occupation' in data) || (data.occupation is string && data.occupation.size() < 100)) &&
+             (!('location' in data) || (data.location is string && data.location.size() < 100)) &&
+             (!('bio' in data) || (data.bio is string && data.bio.size() < 500)) &&
+             (!('linkedin' in data) || (data.linkedin is string && data.linkedin.size() < 200)) &&
+             (!('isPublic' in data) || (data.isPublic is bool));
     }
 
     // ===============================================================
@@ -99,11 +107,12 @@ service cloud.firestore {
     // ===============================================================
 
     match /users/{userId} {
-      allow read: if isAuthenticated();
+      allow read: if isOwner(userId) || isAdmin() || (resource.data.role == 'alumni' && resource.data.isPublic == true);
       allow create: if isOwner(userId) && isValidUser(request.resource.data) && 
                     (request.resource.data.role != 'admin' || isAdmin());
-      allow update: if isOwner(userId) && isValidUser(request.resource.data) && 
-                    (request.resource.data.role == resource.data.role || isAdmin());
+      allow update: if (isOwner(userId) && isValidUser(request.resource.data) && 
+                    (request.resource.data.role == resource.data.role || isAdmin())) ||
+                    isAdmin();
     }
 
     match /news/{newsId} {
