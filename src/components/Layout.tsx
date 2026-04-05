@@ -31,8 +31,13 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center shadow-lg shadow-red-600/20 group-hover:scale-105 transition-transform">
-              <span className="text-white font-black text-xl">M</span>
+            <div className="w-12 h-12 flex items-center justify-center transition-transform group-hover:scale-110">
+              <img 
+                src="https://upload.wikimedia.org/wikipedia/en/3/3d/Mfantsipim_School_Crest.png" 
+                alt="Mfantsipim School Logo" 
+                className="w-full h-full object-contain"
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div className="hidden sm:block">
               <h1 className="text-[var(--foreground)] font-black text-lg leading-none uppercase tracking-tight">
@@ -187,8 +192,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center shadow-lg shadow-red-600/20">
-                <span className="text-white font-black text-xl">M</span>
+              <div className="w-12 h-12 flex items-center justify-center">
+                <img 
+                  src="https://upload.wikimedia.org/wikipedia/en/3/3d/Mfantsipim_School_Crest.png" 
+                  alt="Mfantsipim School Logo" 
+                  className="w-full h-full object-contain"
+                  referrerPolicy="no-referrer"
+                />
               </div>
               <h2 className="font-black text-xl uppercase tracking-tight">{SCHOOL_INFO.name}</h2>
             </div>

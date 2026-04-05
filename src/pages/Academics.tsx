@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { BookOpen, FlaskConical, Palette, Microscope, Library, Cpu } from 'lucide-react';
+import { BookOpen, FlaskConical, Palette, Microscope, Library, Cpu, Hammer } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 
 const departments = [
@@ -11,9 +11,9 @@ const departments = [
     desc: 'Our flagship department, producing top scientists and medical professionals.',
   },
   {
-    name: 'Business',
-    icon: BookOpen,
-    courses: ['Accounting', 'Business Management', 'Economics', 'Costing'],
+    name: 'Applied Technology',
+    icon: Hammer,
+    courses: ['DCT', 'Building and Woodwork', 'Automobile', 'Electricals'],
     desc: 'Training the next generation of business leaders and entrepreneurs.',
   },
   {
