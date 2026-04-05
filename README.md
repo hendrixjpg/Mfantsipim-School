@@ -6,7 +6,7 @@
 
 This contains everything you need to run your app locally.
 
-View your app in AI Studio: https://ai.studio/apps/076f8a52-8f31-484e-b22b-7644e7f71849
+mfantsipimschool.com
 
 ## Run Locally
 
