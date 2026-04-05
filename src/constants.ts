@@ -10,7 +10,7 @@ export const SCHOOL_INFO = {
     white: "#FFFFFF",
   },
   contact: {
-    email: "info@mfantsipim.edu.gh",
+    email: "seldogbey234@gmail.com",
     phone: "+233 33 213 2438",
     address: "P.O. Box 101, Cape Coast, Ghana",
   },
