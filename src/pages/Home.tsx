@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, Trophy, Users, GraduationCap, Newspaper, Loader2 } from 'lucide-react';
+import { ArrowRight, Trophy, Users, GraduationCap, Newspaper, Loader2, CheckCircle2, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SCHOOL_INFO } from '@/src/constants';
 import Leaderboard from '@/src/components/Leaderboard';
@@ -26,254 +26,184 @@ export default function Home() {
     });
     return () => unsubscribe();
   }, []);
+
   return (
-    <div className="overflow-hidden">
+    <div className="bg-[var(--background)]">
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Animated Background Elements */}
+      <section className="relative min-h-[90vh] flex items-center pt-20 overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img
             src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Mfantsipim-school-main-entrance-front-view.jpg"
             alt="Mfantsipim School Campus"
-            className="w-full h-full object-cover opacity-20 scale-110 blur-[2px]"
+            className="w-full h-full object-cover opacity-10"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/80 to-[#050505]"></div>
-          
-          {/* Floating Glows */}
-          <motion.div 
-            animate={{ 
-              scale: [1, 1.2, 1],
-              opacity: [0.3, 0.5, 0.3],
-              x: [0, 100, 0],
-              y: [0, -50, 0]
-            }}
-            transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-            className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-[120px]" 
-          />
-          <motion.div 
-            animate={{ 
-              scale: [1.2, 1, 1.2],
-              opacity: [0.2, 0.4, 0.2],
-              x: [0, -100, 0],
-              y: [0, 50, 0]
-            }}
-            transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
-            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[120px]" 
-          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[var(--background)]/50 via-transparent to-[var(--background)]"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="mb-12"
-          >
-            <motion.div 
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.2 }}
-              className="w-24 h-24 glass rounded-3xl mx-auto flex items-center justify-center mb-8 neon-red relative group glitch-hover"
+        <div className="container-custom relative z-10">
+          <div className="max-w-3xl">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
             >
-              <div className="absolute inset-0 bg-red-600/20 rounded-3xl blur-xl group-hover:bg-red-600/40 transition-all" />
-              <div className="hud-corner hud-corner-tl -top-2 -left-2" />
-              <div className="hud-corner hud-corner-tr -top-2 -right-2" />
-              <div className="hud-corner hud-corner-bl -bottom-2 -left-2" />
-              <div className="hud-corner hud-corner-br -bottom-2 -right-2" />
-              <span className="text-white font-black text-5xl relative z-10 text-glow">M</span>
-            </motion.div>
-            
-            <h1 className="text-6xl md:text-8xl font-black text-white uppercase tracking-tighter mb-6 leading-none relative">
-              <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50">
-                {SCHOOL_INFO.name}
-              </span>
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 text-[8px] font-mono text-red-600/50 tracking-[0.5em] uppercase pointer-events-none">
-                ESTABLISHED_1876
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-600/10 text-red-600 rounded-full text-xs font-bold uppercase tracking-widest mb-8">
+                <Star size={14} fill="currentColor" />
+                Est. 1876 • First in Ghana
               </div>
-            </h1>
-            
-            <div className="flex items-center justify-center gap-4 mb-8">
-              <div className="h-[1px] w-12 bg-gradient-to-r from-transparent to-red-600" />
-              <p className="text-sm md:text-base text-red-500 font-black tracking-[0.3em] uppercase">
-                {SCHOOL_INFO.motto}
+              
+              <h1 className="text-5xl md:text-7xl font-black text-[var(--foreground)] uppercase tracking-tight mb-6 leading-[1.1]">
+                Dwen Hwe Kan: <br />
+                <span className="text-red-600">Think and Look Ahead</span>
+              </h1>
+              
+              <p className="text-lg md:text-xl text-[var(--muted-foreground)] font-medium mb-10 leading-relaxed max-w-2xl">
+                Mfantsipim School is more than an institution; it is a legacy of excellence, character, and leadership that has shaped the nation for over a century.
               </p>
-              <div className="h-[1px] w-12 bg-gradient-to-l from-transparent to-red-600" />
-            </div>
 
-            <p className="max-w-2xl mx-auto text-gray-400 text-lg font-medium mb-12">
-              The first secondary school in Ghana, established in 1876. 
-              Pioneering excellence for over a century and a half.
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-6"
-          >
-            <Link
-              to="/about"
-              className="px-10 py-4 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl transition-all flex items-center group neon-red neon-red-hover glitch-hover"
-            >
-              EXPLORE HERITAGE <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              to="/admissions"
-              className="px-10 py-4 glass glass-hover text-white font-black rounded-2xl transition-all neon-red-hover glitch-hover"
-            >
-              ADMISSIONS
-            </Link>
-          </motion.div>
+              <div className="flex flex-wrap gap-4">
+                <Link to="/about" className="btn-primary flex items-center group">
+                  Our Heritage <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link to="/admissions" className="btn-secondary">
+                  Admissions
+                </Link>
+              </div>
+            </motion.div>
+          </div>
         </div>
-
-        {/* Scroll Indicator */}
-        <motion.div 
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50"
-        >
-          <div className="w-[1px] h-12 bg-gradient-to-b from-red-600 to-transparent" />
-          <span className="text-[10px] font-black tracking-[0.2em] uppercase">Scroll</span>
-        </motion.div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-32 relative overflow-hidden">
-        <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-red-600/10 to-transparent pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+      <section className="section-padding bg-[var(--muted)]">
+        <div className="container-custom">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { label: 'FOUNDED_DATE', value: SCHOOL_INFO.founded, icon: GraduationCap },
-              { label: 'ALUMNI_NETWORK', value: '10,000+', icon: Users },
-              { label: 'AWARDS_EARNED', value: '500+', icon: Trophy },
-              { label: 'ACTIVE_STUDENTS', value: '2,500+', icon: GraduationCap },
+              { label: 'Founded', value: SCHOOL_INFO.founded, icon: GraduationCap },
+              { label: 'Alumni', value: '10,000+', icon: Users },
+              { label: 'Awards', value: '500+', icon: Trophy },
+              { label: 'Students', value: '2,500+', icon: GraduationCap },
             ].map((stat, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                whileHover={{ 
-                  rotateX: 5, 
-                  rotateY: 5, 
-                  scale: 1.02,
-                  z: 50
-                }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 300, 
-                  damping: 20,
-                  delay: i * 0.1 
-                }}
-                className="glass glass-hover p-8 rounded-[32px] text-center group relative overflow-hidden perspective-1000"
+                transition={{ delay: i * 0.1 }}
+                className="card-base p-8 text-center group"
               >
-                <div className="hud-corner hud-corner-tl opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="hud-corner hud-corner-br opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="w-14 h-14 glass rounded-2xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 transition-transform duration-500 neon-red">
-                  <stat.icon className="text-red-600" size={28} />
+                <div className="w-12 h-12 bg-red-600/10 rounded-xl flex items-center justify-center mx-auto mb-6 group-hover:bg-red-600 group-hover:text-white transition-all">
+                  <stat.icon size={24} className="text-red-600 group-hover:text-white transition-colors" />
                 </div>
-                <div className="text-5xl font-black text-white mb-2 tracking-tighter text-glow">{stat.value}</div>
-                <div className="text-gray-500 text-[8px] font-mono font-black uppercase tracking-[0.3em]">{stat.label}</div>
+                <div className="text-4xl font-black text-[var(--foreground)] mb-1">{stat.value}</div>
+                <div className="text-[var(--muted-foreground)] text-xs font-bold uppercase tracking-widest">{stat.label}</div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* Core Values */}
+      <section className="section-padding">
+        <div className="container-custom">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight mb-6">Built on Excellence</h2>
+            <p className="text-[var(--muted-foreground)] text-lg">Our mission is to foster an environment where students excel academically and grow into responsible, visionary leaders.</p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { title: 'Academic Rigor', desc: 'Consistently ranking among the top schools in West Africa with a focus on holistic education.' },
+              { title: 'Character Building', desc: 'Instilling values of integrity, service, and discipline in every student.' },
+              { title: 'Global Network', desc: 'A vast network of Old Boys (MOBA) leading in every sector across the globe.' },
+            ].map((item, i) => (
+              <div key={i} className="card-base p-10 card-hover">
+                <CheckCircle2 className="text-red-600 mb-6" size={32} />
+                <h3 className="text-xl font-bold mb-4">{item.title}</h3>
+                <p className="text-[var(--muted-foreground)] leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Leaderboard & Achievements */}
-      <section className="py-24 bg-zinc-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-            <Leaderboard />
-            <Achievements />
+      <section className="section-padding bg-[var(--muted)]">
+        <div className="container-custom">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="card-base p-8 shadow-xl bg-[var(--card)]">
+              <Leaderboard />
+            </div>
+            <div className="card-base p-8 shadow-xl bg-[var(--card)]">
+              <Achievements />
+            </div>
           </div>
         </div>
       </section>
 
       {/* News Preview */}
-      <section className="py-32 bg-black relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-red-600/5 blur-[120px] pointer-events-none" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+      <section className="section-padding">
+        <div className="container-custom">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
             <div>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-[1px] bg-red-600" />
-                <span className="text-red-600 font-mono font-black text-[10px] uppercase tracking-[0.4em]">Updates_Feed</span>
-              </div>
-              <h2 className="text-5xl font-black text-white uppercase tracking-tighter leading-none">Latest News</h2>
+              <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight mb-4">Latest Updates</h2>
+              <p className="text-[var(--muted-foreground)] max-w-xl">Stay informed with the latest news, events, and achievements from the Mfantsipim community.</p>
             </div>
             <Link 
               to="/news" 
-              className="group flex items-center space-x-4 glass px-8 py-4 rounded-2xl hover:bg-red-600/10 transition-all neon-red-hover glitch-hover"
+              className="btn-secondary flex items-center group"
             >
-              <span className="text-[10px] font-mono font-black uppercase tracking-[0.3em]">View_All_Updates</span>
-              <ArrowRight className="text-red-600 group-hover:translate-x-2 transition-transform" size={20} />
+              View All News <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={18} />
             </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {loading ? (
-              <div className="col-span-full flex flex-col items-center justify-center py-20 glass rounded-[32px]">
-                <Loader2 className="animate-spin text-red-600 mb-6" size={40} />
-                <p className="text-gray-500 font-mono font-black uppercase tracking-[0.3em] text-[10px]">Syncing_Data_Stream...</p>
+              <div className="col-span-full flex flex-col items-center justify-center py-20">
+                <Loader2 className="animate-spin text-red-600 mb-4" size={40} />
+                <p className="text-[var(--muted-foreground)] font-bold uppercase tracking-widest text-xs">Syncing Feed...</p>
               </div>
             ) : news.length > 0 ? news.slice(0, 3).map((item, i) => (
               <motion.article
                 key={item.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                whileHover={{ 
-                  rotateX: 2, 
-                  rotateY: 2, 
-                  scale: 1.01,
-                  z: 20
-                }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 300, 
-                  damping: 20,
-                  delay: i * 0.1 
-                }}
-                className="glass glass-hover rounded-[32px] overflow-hidden group flex flex-col h-full relative perspective-1000"
+                transition={{ delay: i * 0.1 }}
+                className="card-base overflow-hidden group flex flex-col h-full card-hover"
               >
-                <div className="hud-corner hud-corner-tr opacity-0 group-hover:opacity-100 transition-opacity" />
                 <Link to={`/news/${item.id}`} className="flex flex-col h-full">
-                  <div className="relative h-64 overflow-hidden">
+                  <div className="relative h-56 overflow-hidden">
                     <img 
                       src={item.imageUrl || `https://picsum.photos/seed/school-${i}/800/450`} 
                       alt={item.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       referrerPolicy="no-referrer"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
-                    <div className="absolute top-4 left-4 glass px-4 py-2 rounded-xl">
-                      <span className="text-[8px] font-mono font-black text-white uppercase tracking-widest">{item.category}</span>
+                    <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest">
+                      {item.category}
                     </div>
                   </div>
                   <div className="p-8 flex-1 flex flex-col">
-                    <div className="text-[9px] font-mono text-red-600 font-black uppercase tracking-[0.2em] mb-4">
-                      {format(new Date(item.date), 'dd_MMM_yyyy').toUpperCase()}
+                    <div className="text-xs font-bold text-red-600 uppercase tracking-widest mb-3">
+                      {format(new Date(item.date), 'MMMM dd, yyyy')}
                     </div>
-                    <h3 className="text-xl font-black text-white mb-4 tracking-tight leading-tight group-hover:text-red-500 transition-colors line-clamp-2">
+                    <h3 className="text-xl font-bold text-[var(--foreground)] mb-4 leading-tight group-hover:text-red-600 transition-colors">
                       {item.title}
                     </h3>
-                    <p className="text-gray-500 text-sm line-clamp-2 mb-6 font-medium leading-relaxed">
+                    <p className="text-[var(--muted-foreground)] text-sm line-clamp-3 mb-6 leading-relaxed">
                       {item.content}
                     </p>
-                    <div className="mt-auto pt-6 border-t border-white/5">
-                      <div className="flex items-center text-[9px] font-mono font-black text-gray-500 group-hover:text-white uppercase tracking-[0.3em] transition-colors group/link">
-                        Read_Full_Article <ArrowRight size={12} className="ml-2 group-hover/link:translate-x-1 transition-transform" />
-                      </div>
+                    <div className="mt-auto flex items-center text-xs font-bold text-red-600 uppercase tracking-widest group/link">
+                      Read More <ArrowRight size={14} className="ml-2 group-hover/link:translate-x-1 transition-transform" />
                     </div>
                   </div>
                 </Link>
               </motion.article>
             )) : (
-              <div className="col-span-full text-center py-20 glass rounded-[32px] text-gray-500 font-mono font-black uppercase tracking-[0.3em] text-[10px]">
-                NO_ACTIVE_DATA_FEEDS
+              <div className="col-span-full text-center py-20 card-base text-[var(--muted-foreground)] font-bold uppercase tracking-widest text-xs">
+                No recent updates available.
               </div>
             )}
           </div>

@@ -9,27 +9,32 @@
 
 @layer base {
   :root {
-    --background: #f8fafc;
-    --foreground: #0f172a;
-    --muted: rgba(0, 0, 0, 0.05);
-    --border: rgba(0, 0, 0, 0.1);
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(0, 0, 0, 0.1);
-    --grid-color: rgba(0, 0, 0, 0.05);
-    --noise-opacity: 0.02;
-    --scanline-opacity: 0.05;
+    --background: #ffffff;
+    --foreground: #1a1a1a;
+    --muted: #f4f4f5;
+    --muted-foreground: #71717a;
+    --border: #e4e4e7;
+    --primary: #c51e3a;
+    --primary-foreground: #ffffff;
+    --card: #ffffff;
+    --card-foreground: #1a1a1a;
+    --accent: #f4f4f5;
+    --accent-foreground: #1a1a1a;
+    --radius: 0.75rem;
   }
 
   .dark {
-    --background: #050505;
-    --foreground: #ffffff;
-    --muted: rgba(255, 255, 255, 0.05);
-    --border: rgba(255, 255, 255, 0.1);
-    --glass-bg: rgba(255, 255, 255, 0.03);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --grid-color: rgba(255, 255, 255, 0.05);
-    --noise-opacity: 0.03;
-    --scanline-opacity: 0.1;
+    --background: #09090b;
+    --foreground: #fafafa;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --border: #27272a;
+    --primary: #e11d48;
+    --primary-foreground: #ffffff;
+    --card: #09090b;
+    --card-foreground: #fafafa;
+    --accent: #27272a;
+    --accent-foreground: #fafafa;
   }
 
   body {
@@ -37,140 +42,77 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display tracking-tight text-[var(--foreground)];
+    @apply font-display tracking-tight text-[var(--foreground)] font-bold;
   }
 }
 
 @layer components {
+  .card-base {
+    @apply bg-[var(--card)] border border-[var(--border)] rounded-[var(--radius)] shadow-sm transition-all duration-200;
+  }
+
+  .card-hover {
+    @apply hover:shadow-md hover:border-red-600/20 transition-all duration-200;
+  }
+
+  .btn-primary {
+    @apply bg-red-600 text-white px-6 py-3 rounded-xl font-bold uppercase tracking-wider hover:bg-red-700 active:scale-95 transition-all shadow-lg shadow-red-600/20;
+  }
+
+  .btn-secondary {
+    @apply bg-[var(--muted)] text-[var(--foreground)] px-6 py-3 rounded-xl font-bold uppercase tracking-wider hover:bg-[var(--border)] active:scale-95 transition-all;
+  }
+
   .glass {
-    @apply bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--glass-border)];
+    @apply bg-[var(--card)]/80 backdrop-blur-md border border-[var(--border)];
   }
 
-  .glass-hover {
-    @apply hover:bg-[var(--muted)] hover:border-[var(--border)] transition-all duration-300;
+  .section-padding {
+    @apply py-16 md:py-24;
   }
 
-  .neon-red {
-    @apply shadow-[0_0_20px_rgba(220,38,38,0.3)];
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  .neon-red-hover {
-    @apply hover:shadow-[0_0_30px_rgba(220,38,38,0.5)] transition-all duration-300;
-  }
-
-  .grid-bg {
-    background-image: 
-      linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
-    background-size: 40px 40px;
-    animation: grid-drift 60s linear infinite;
-  }
-
-  @keyframes grid-drift {
-    0% { background-position: 0 0; }
-    100% { background-position: 40px 40px; }
-  }
-
-  .noise-bg {
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: var(--noise-opacity);
-    animation: noise-pulse 8s ease-in-out infinite alternate;
-  }
-
-  @keyframes noise-pulse {
-    0% { opacity: var(--noise-opacity); transform: scale(1); }
-    100% { opacity: calc(var(--noise-opacity) * 1.5); transform: scale(1.05); }
-  }
-
-  .scanline {
-    width: 100%;
-    height: 100px;
-    z-index: 5;
-    background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(220, 38, 38, 0.05) 50%, rgba(0, 0, 0, 0) 100%);
-    opacity: var(--scanline-opacity);
-    position: absolute;
-    bottom: 100%;
-    animation: scanline 8s linear infinite;
-  }
-
-  @keyframes scanline {
-    0% { bottom: 100%; }
-    100% { bottom: -100px; }
-  }
-
-  .glitch-hover:hover {
-    animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both infinite;
-  }
-
-  @keyframes glitch {
-    0% { transform: translate(0); }
-    20% { transform: translate(-2px, 2px); }
-    40% { transform: translate(-2px, -2px); }
-    60% { transform: translate(2px, 2px); }
-    80% { transform: translate(2px, -2px); }
-    100% { transform: translate(0); }
-  }
-
-  .hud-corner {
-    @apply absolute w-4 h-4 border-red-600/30 pointer-events-none;
-  }
-
-  .hud-corner-tl { @apply top-0 left-0 border-t-2 border-l-2; }
-  .hud-corner-tr { @apply top-0 right-0 border-t-2 border-r-2; }
-  .hud-corner-bl { @apply bottom-0 left-0 border-b-2 border-l-2; }
-  .hud-corner-br { @apply bottom-0 right-0 border-b-2 border-r-2; }
-
-  .text-glow {
-    text-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
-  }
-
-  .perspective-1000 {
-    perspective: 1000px;
-    transform-style: preserve-3d;
-  }
-
-  .vertical-text {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
+  /* Accessibility: Focus states */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-red-600 ring-offset-2 ring-offset-[var(--background)];
   }
 
   .markdown-body {
-    @apply text-gray-400 leading-relaxed space-y-4;
+    @apply text-[var(--muted-foreground)] leading-relaxed space-y-4;
   }
   
-  .markdown-body h1 { @apply text-3xl font-black text-white mt-8 mb-4 font-display; }
-  .markdown-body h2 { @apply text-2xl font-bold text-white mt-6 mb-3 font-display; }
-  .markdown-body p { @apply mb-4; }
-  .markdown-body ul { @apply list-disc list-inside space-y-2 mb-4; }
-  .markdown-body ol { @apply list-decimal list-inside space-y-2 mb-4; }
-  .markdown-body a { @apply text-red-500 hover:text-red-400 transition-colors; }
-  .markdown-body blockquote { @apply border-l-4 border-red-600 pl-4 italic text-gray-500 bg-white/[0.02] py-2 rounded-r; }
-  .markdown-body code { @apply bg-white/10 px-1.5 py-0.5 rounded font-mono text-sm text-red-400; }
-}
+  .markdown-body h1 { @apply text-4xl font-black text-[var(--foreground)] mt-12 mb-6 font-display; }
+  .markdown-body h2 { @apply text-3xl font-bold text-[var(--foreground)] mt-10 mb-5 font-display; }
+  .markdown-body p { @apply mb-6 text-lg; }
+  .markdown-body ul { @apply list-disc list-inside space-y-3 mb-6; }
+  .markdown-body ol { @apply list-decimal list-inside space-y-3 mb-6; }
+  .markdown-body a { @apply text-red-600 font-semibold underline decoration-2 underline-offset-4 hover:text-red-700 transition-colors; }
+  .markdown-body blockquote { @apply border-l-4 border-red-600 pl-6 italic text-[var(--muted-foreground)] bg-[var(--muted)] py-4 rounded-r-lg; }
+  .markdown-body code { @apply bg-[var(--muted)] px-2 py-1 rounded font-mono text-sm text-red-600; }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  /* Remove distracting OS elements */
+  .scanline, .noise-bg, .grid-bg, .hud-corner, .glitch-hover {
+    display: none !important;
+  }
 }
 
 .scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--background);
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--border);
   border-radius: 10px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--muted-foreground);
 }
 
