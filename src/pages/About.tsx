@@ -81,6 +81,7 @@ export default function About() {
               { year: '1905', title: 'The Name Change', desc: 'Officially named Mfantsipim School.' },
               { year: '1931', title: 'Current Site', desc: 'Moved to the current site at Kwabotwe Hill.' },
               { year: '1999-2025', title: 'NSMQ', desc: 'Won NSMQ 1999,2014,2024 and 2025' },
+              { year: '2025', title: 'NSMQ', desc: 'Mfantsipim School in Cape Coast, popularly known as Kwabotwe or simply Botwe, gallantly defended its title when it beat St. Augustines College, Cape Coast, and Opoku Ware School, Kumasi, at the grand finale of National Science and Mathematics Quiz (NSMQ) 2025 held in Cape Coast. At the end of the fiercely contested final, Mfantsipim School lifted the trophy for the second consecutive time with 56 points, while St. Augustines College followed in second place with 42 points and Opoku Ware School had 29 points to place third.'},
               { year: '2026', title: 'Legacy of Excellence', desc: 'Celebrating 150 years and Continuing the legacy of producing visionary leaders for Ghana and the world.' },
             ].map((item, i) => (
               <motion.div

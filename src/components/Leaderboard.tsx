@@ -26,14 +26,14 @@ export default function Leaderboard() {
 
   const getHouseColor = (house: string) => {
     const colors: Record<string, string> = {
-      'Bartlett': 'bg-red-600',
-      'Pickard': 'bg-blue-600',
-      'Lockhart': 'bg-green-600',
-      'Sarbah': 'bg-yellow-600',
-      'Freeman': 'bg-purple-600',
-      'Balmer': 'bg-orange-600',
-      'Acquaah': 'bg-pink-600',
-      'Abruquah': 'bg-indigo-600'
+      'BARTELS SNEATH': 'bg-red-600',
+      'PICKARD PACKARD': 'bg-blue-600',
+      'LOCKHART SHWEITZER': 'bg-green-600',
+      'SARBAH PICOT': 'bg-yellow-600',
+      'FREEMAN AGGREY': 'bg-purple-600',
+      'BALMER ACQUUAH': 'bg-orange-600',
+      'BRANDFUL DONTWI': 'bg-pink-600',
+      'ABRUQUAH MONNEY': 'bg-indigo-600'
     };
     return colors[house] || 'bg-gray-600';
   };
