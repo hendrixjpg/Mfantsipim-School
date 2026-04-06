@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Newspaper, Calendar, User, ArrowRight, Search, Filter, Loader2, Trash2, Share2 } from 'lucide-react';
+import { Newspaper, Calendar, User, ArrowRight, Search, Loader2, Trash2, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { collection, onSnapshot, query, orderBy, doc, deleteDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/src/firebase';
@@ -50,7 +50,7 @@ export default function News() {
       unsubscribeAuth();
       unsubscribeNews();
     };
-  }, []);
+  }, [auth, db]);
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.preventDefault();

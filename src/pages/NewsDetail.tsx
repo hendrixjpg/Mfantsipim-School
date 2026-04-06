@@ -51,7 +51,7 @@ export default function NewsDetail() {
     fetchNews();
 
     return () => unsubscribeAuth();
-  }, [id]);
+  }, [id, auth, db]);
 
   const handleDelete = async () => {
     if (!id) return;

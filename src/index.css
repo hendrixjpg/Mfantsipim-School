@@ -23,20 +23,6 @@
     --radius: 0.75rem;
   }
 
-  .dark {
-    --background: #09090b;
-    --foreground: #fafafa;
-    --muted: #27272a;
-    --muted-foreground: #a1a1aa;
-    --border: #27272a;
-    --primary: #e11d48;
-    --primary-foreground: #ffffff;
-    --card: #09090b;
-    --card-foreground: #fafafa;
-    --accent: #27272a;
-    --accent-foreground: #fafafa;
-  }
-
   body {
     @apply bg-[var(--background)] text-[var(--foreground)] font-sans antialiased selection:bg-red-600 selection:text-white transition-colors duration-300;
   }
@@ -93,8 +79,56 @@
   .markdown-body blockquote { @apply border-l-4 border-red-600 pl-6 italic text-[var(--muted-foreground)] bg-[var(--muted)] py-4 rounded-r-lg; }
   .markdown-body code { @apply bg-[var(--muted)] px-2 py-1 rounded font-mono text-sm text-red-600; }
 
-  /* Remove distracting OS elements */
-  .scanline, .noise-bg, .grid-bg, .hud-corner, .glitch-hover {
+  /* Futuristic Theme Utilities */
+  .futuristic-glass {
+    @apply bg-black/40 backdrop-blur-xl border border-white/10 shadow-[0_0_20px_rgba(0,0,0,0.5)];
+  }
+
+  .neon-border-red {
+    @apply border-red-600/50 shadow-[0_0_15px_rgba(220,38,38,0.3)];
+  }
+
+  .neon-text-red {
+    @apply text-red-500 shadow-[0_0_10px_rgba(220,38,38,0.5)];
+  }
+
+  .scanline {
+    width: 100%;
+    height: 100px;
+    z-index: 10;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(220, 38, 38, 0.02) 50%, rgba(0, 0, 0, 0) 100%);
+    opacity: 0.1;
+    position: absolute;
+    bottom: 100%;
+    animation: scanline 10s linear infinite;
+  }
+
+  @keyframes scanline {
+    0% { bottom: 100%; }
+    100% { bottom: -100%; }
+  }
+
+  .grid-bg-futuristic {
+    background-image: linear-gradient(rgba(220, 38, 38, 0.05) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(220, 38, 38, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  .hud-corner {
+    @apply absolute w-4 h-4 border-red-600/40 pointer-events-none;
+  }
+
+  .hud-corner-tl { @apply top-0 left-0 border-t-2 border-l-2; }
+  .hud-corner-tr { @apply top-0 right-0 border-t-2 border-r-2; }
+  .hud-corner-bl { @apply bottom-0 left-0 border-b-2 border-l-2; }
+  .hud-corner-br { @apply bottom-0 right-0 border-b-2 border-r-2; }
+
+  /* Remove distracting OS elements - EXCEPT in futuristic-theme */
+  :not(.futuristic-theme) .scanline, 
+  :not(.futuristic-theme) .noise-bg, 
+  :not(.futuristic-theme) .grid-bg, 
+  :not(.futuristic-theme) .hud-corner, 
+  :not(.futuristic-theme) .glitch-hover {
     display: none !important;
   }
 }
