@@ -3,12 +3,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShieldCheck, LogIn, LayoutDashboard, Newspaper, Trophy, Users, 
   Settings, LogOut, Loader2, Plus, Trash2, Save, RefreshCw, Database, X,
-  BarChart3, Activity, Star, Eye, EyeOff
+  BarChart3, Activity, Star, Eye, EyeOff, TrendingUp, PieChart as PieChartIcon
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  AreaChart, Area, Cell
+  AreaChart, Area, Cell, PieChart, Pie, Legend
 } from 'recharts';
 import { cn } from '@/src/lib/utils';
 import { auth, db } from '@/src/firebase';
@@ -127,7 +127,8 @@ const DashboardTab = ({
   deleteAllNews, 
   seedLeaderboard, 
   seedNotableAlumni,
-  leaderboard 
+  leaderboard,
+  newsList
 }: { 
   newsCount: number, 
   alumniCount: number, 
@@ -136,9 +137,22 @@ const DashboardTab = ({
   deleteAllNews: () => void, 
   seedLeaderboard: () => void, 
   seedNotableAlumni: () => void,
-  leaderboard: LeaderboardEntry[] 
+  leaderboard: LeaderboardEntry[],
+  newsList: NewsItem[]
 }) => {
   const houseData = leaderboard.map((h: any) => ({ name: h.houseName, points: h.points }));
+  
+  const categoryData = newsList.reduce((acc: any[], item) => {
+    const existing = acc.find(c => c.name === item.category);
+    if (existing) {
+      existing.value += 1;
+    } else {
+      acc.push({ name: item.category, value: 1 });
+    }
+    return acc;
+  }, []);
+
+  const COLORS = ['#dc2626', '#2563eb', '#16a34a', '#ca8a04', '#9333ea', '#0891b2'];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
@@ -210,6 +224,44 @@ const DashboardTab = ({
                     animationDuration={1500}
                   />
                 </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          <div className="p-8 rounded-[32px] bg-white border border-zinc-200/60 shadow-sm">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-xl bg-red-50 text-red-600">
+                  <PieChartIcon size={20} />
+                </div>
+                <h3 className="text-xl font-black text-zinc-900 tracking-tight">Content Distribution</h3>
+              </div>
+            </div>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={80}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {categoryData.map((entry: any, index: number) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    height={36}
+                    formatter={(value) => <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{value}</span>}
+                  />
+                </PieChart>
               </ResponsiveContainer>
             </div>
           </div>
@@ -342,21 +394,27 @@ const NewsTab = ({
   newsContent, 
   setNewsContent,
   showPreview,
-  setShowPreview
+  setShowPreview,
+  editingNewsId,
+  handleEditNews,
+  cancelEdit
 }: { 
   newsList: NewsItem[], 
   handlePostNews: (e: React.FormEvent) => void, 
   isSubmitting: boolean, 
   newsTitle: string, 
   setNewsTitle: (val: string) => void, 
-  newsCategory: string, 
-  setNewsCategory: (val: string) => void, 
+  newsCategory: NewsItem['category'], 
+  setNewsCategory: (val: NewsItem['category']) => void, 
   newsImage: string, 
   setNewsImage: (val: string) => void, 
   newsContent: string, 
   setNewsContent: (val: string) => void,
   showPreview: boolean,
-  setShowPreview: (val: boolean) => void
+  setShowPreview: (val: boolean) => void,
+  editingNewsId: string | null,
+  handleEditNews: (item: NewsItem) => void,
+  cancelEdit: () => void
 }) => (
   <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -365,11 +423,18 @@ const NewsTab = ({
         <div className="p-8 rounded-[32px] bg-white border border-zinc-200/60 shadow-sm">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-black text-zinc-900 tracking-tight">Compose Article</h2>
-              <p className="text-xs text-zinc-500 font-medium mt-1 uppercase tracking-wider">Publish news to the alumni portal</p>
+              <h2 className="text-2xl font-black text-zinc-900 tracking-tight">
+                {editingNewsId ? 'Edit Article' : 'Compose Article'}
+              </h2>
+              <p className="text-xs text-zinc-500 font-medium mt-1 uppercase tracking-wider">
+                {editingNewsId ? 'Modify existing content' : 'Publish news to the alumni portal'}
+              </p>
             </div>
-            <div className="p-3 rounded-2xl bg-red-50 text-red-600">
-              <Plus size={24} />
+            <div className={cn(
+              "p-3 rounded-2xl transition-colors",
+              editingNewsId ? "bg-amber-50 text-amber-600" : "bg-red-50 text-red-600"
+            )}>
+              {editingNewsId ? <RefreshCw size={24} /> : <Plus size={24} />}
             </div>
           </div>
           
@@ -401,7 +466,7 @@ const NewsTab = ({
                 <div className="relative group">
                   <select 
                     value={newsCategory}
-                    onChange={(e) => setNewsCategory(e.target.value)}
+                    onChange={(e) => setNewsCategory(e.target.value as NewsItem['category'])}
                     className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl px-5 py-4 text-zinc-900 focus:outline-none focus:ring-4 focus:ring-red-600/5 focus:border-red-600 transition-all appearance-none font-medium cursor-pointer"
                   >
                     <option value="General">General</option>
@@ -449,6 +514,15 @@ const NewsTab = ({
             </div>
             
             <div className="flex items-center justify-end space-x-4 pt-4">
+              {editingNewsId && (
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  className="px-8 py-4 font-black uppercase tracking-[0.2em] text-xs rounded-2xl transition-all flex items-center border border-zinc-200 text-zinc-500 hover:bg-zinc-50"
+                >
+                  Cancel Edit
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setShowPreview(!showPreview)}
@@ -465,10 +539,15 @@ const NewsTab = ({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-10 py-4 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl transition-all disabled:opacity-50 flex items-center shadow-xl shadow-red-600/20 hover:scale-[1.02] active:scale-[0.98]"
+                className={cn(
+                  "px-10 py-4 text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl transition-all disabled:opacity-50 flex items-center shadow-xl hover:scale-[1.02] active:scale-[0.98]",
+                  editingNewsId 
+                    ? "bg-amber-600 hover:bg-amber-700 shadow-amber-600/20" 
+                    : "bg-red-600 hover:bg-red-700 shadow-red-600/20"
+                )}
               >
                 {isSubmitting ? <Loader2 className="animate-spin mr-3" size={18} /> : <Save className="mr-3" size={18} />}
-                Publish Article
+                {editingNewsId ? 'Update Article' : 'Publish Article'}
               </button>
             </div>
           </form>
@@ -498,7 +577,10 @@ const NewsTab = ({
                     {newsCategory}
                   </span>
                   <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">
-                    {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    {editingNewsId 
+                      ? `Original Date: ${new Date(newsList.find(n => n.id === editingNewsId)?.date || '').toLocaleDateString()}`
+                      : new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                    }
                   </span>
                 </div>
                 <h1 className="text-3xl md:text-4xl font-black text-zinc-900 mb-8 tracking-tight leading-tight">
@@ -526,7 +608,12 @@ const NewsTab = ({
         
         <div className="space-y-4 max-h-[700px] overflow-y-auto pr-2 scrollbar-thin">
           {newsList.map((item: NewsItem) => (
-            <div key={item.id} className="p-4 rounded-2xl bg-zinc-50 border border-zinc-100 group hover:border-red-200 transition-all duration-300">
+            <div key={item.id} className={cn(
+              "p-4 rounded-2xl border transition-all duration-300 group",
+              editingNewsId === item.id 
+                ? "bg-amber-50 border-amber-200" 
+                : "bg-zinc-50 border-zinc-100 hover:border-red-200"
+            )}>
               <div className="flex items-start space-x-4">
                 <div className="w-16 h-16 rounded-xl overflow-hidden bg-zinc-200 flex-shrink-0 border border-zinc-200">
                   <img 
@@ -547,20 +634,29 @@ const NewsTab = ({
                     </span>
                   </div>
                 </div>
-                <button
-                  onClick={async () => {
-                    if (confirm('Are you sure you want to delete this article?')) {
-                      try {
-                        await deleteDoc(doc(db, 'news', item.id));
-                      } catch (error) {
-                        handleFirestoreError(error, OperationType.DELETE, `news/${item.id}`);
+                <div className="flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => handleEditNews(item)}
+                    className="p-2 text-zinc-400 hover:text-amber-600 hover:bg-white rounded-xl transition-all shadow-sm"
+                  >
+                    <RefreshCw size={16} />
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (confirm('Are you sure you want to delete this article?')) {
+                        try {
+                          await deleteDoc(doc(db, 'news', item.id));
+                          if (editingNewsId === item.id) cancelEdit();
+                        } catch (error) {
+                          handleFirestoreError(error, OperationType.DELETE, `news/${item.id}`);
+                        }
                       }
-                    }
-                  }}
-                  className="p-2 text-zinc-400 hover:text-red-600 hover:bg-white rounded-xl transition-all shadow-sm opacity-0 group-hover:opacity-100"
-                >
-                  <Trash2 size={16} />
-                </button>
+                    }}
+                    className="p-2 text-zinc-400 hover:text-red-600 hover:bg-white rounded-xl transition-all shadow-sm"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -587,6 +683,8 @@ const LeaderboardTab = ({
 }) => {
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [editPoints, setEditPoints] = React.useState<number>(0);
+  const [newHouseName, setNewHouseName] = React.useState('');
+  const [isAdding, setIsAdding] = React.useState(false);
 
   const handleUpdatePoints = async (id: string) => {
     try {
@@ -599,170 +697,257 @@ const LeaderboardTab = ({
     }
   };
 
+  const handleAddHouse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newHouseName) return;
+    setIsAdding(true);
+    try {
+      await addDoc(collection(db, 'leaderboard'), {
+        houseName: newHouseName,
+        points: 0,
+        rank: leaderboard.length + 1
+      });
+      setNewHouseName('');
+      alert('House added successfully!');
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'leaderboard');
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="p-8 rounded-[32px] bg-white border border-zinc-200/60 shadow-sm">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-2xl font-black text-zinc-900 tracking-tight">House Standings</h2>
-            <p className="text-xs text-zinc-500 font-medium mt-1 uppercase tracking-wider">Manage points and rankings for school houses</p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 p-8 rounded-[32px] bg-white border border-zinc-200/60 shadow-sm">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-black text-zinc-900 tracking-tight">House Standings</h2>
+              <p className="text-xs text-zinc-500 font-medium mt-1 uppercase tracking-wider">Manage points and rankings for school houses</p>
+            </div>
+            <div className="p-3 rounded-2xl bg-amber-50 text-amber-500">
+              <Trophy size={24} />
+            </div>
           </div>
-          <div className="p-3 rounded-2xl bg-amber-50 text-amber-500">
-            <Trophy size={24} />
+
+          <div className="grid grid-cols-1 gap-4">
+            {leaderboard.sort((a, b) => b.points - a.points).map((house: LeaderboardEntry, index: number) => (
+              <div key={house.id} className="p-6 rounded-[24px] bg-zinc-50 border border-zinc-100 group hover:border-red-200 transition-all duration-300">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className={cn(
+                      "w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black shadow-sm",
+                      index === 0 ? "bg-amber-500 text-white" : 
+                      index === 1 ? "bg-zinc-300 text-zinc-700" :
+                      index === 2 ? "bg-amber-700/80 text-white" : "bg-white text-zinc-400"
+                    )}>
+                      {index + 1}
+                    </div>
+                    <div>
+                      <h4 className="text-base font-black text-zinc-900 tracking-tight">{house.houseName}</h4>
+                      <div className="flex items-center space-x-2 mt-0.5">
+                        <span className="text-[10px] font-black text-red-600 uppercase tracking-widest">{house.points.toLocaleString()} PTS</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    {editingId === house.id ? (
+                      <div className="flex items-center space-x-2 animate-in fade-in zoom-in-95 duration-200">
+                        <input
+                          type="number"
+                          value={editPoints}
+                          onChange={(e) => setEditPoints(parseInt(e.target.value) || 0)}
+                          className="w-24 bg-white border border-zinc-200 rounded-xl px-3 py-2 text-zinc-900 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-red-600/5 focus:border-red-600"
+                        />
+                        <button
+                          onClick={() => handleUpdatePoints(house.id)}
+                          className="p-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-600/20"
+                        >
+                          <Save size={18} />
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="p-2.5 bg-zinc-100 text-zinc-500 rounded-xl hover:text-zinc-900 transition-all"
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => {
+                            setEditingId(house.id);
+                            setEditPoints(house.points);
+                          }}
+                          className="px-4 py-2 bg-white border border-zinc-200 text-zinc-500 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-zinc-50 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
+                        >
+                          Update
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (confirm(`Are you sure you want to delete ${house.houseName}?`)) {
+                              try {
+                                await deleteDoc(doc(db, 'leaderboard', house.id));
+                              } catch (error) {
+                                handleFirestoreError(error, OperationType.DELETE, `leaderboard/${house.id}`);
+                              }
+                            }
+                          }}
+                          className="p-2 text-zinc-400 hover:text-red-600 hover:bg-white rounded-xl transition-all shadow-sm opacity-0 group-hover:opacity-100"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {leaderboard.map((house: LeaderboardEntry, index: number) => (
-            <div key={house.id} className="p-6 rounded-[24px] bg-zinc-50 border border-zinc-100 group hover:border-red-200 transition-all duration-300">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className={cn(
-                    "w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black shadow-sm",
-                    index === 0 ? "bg-amber-500 text-white" : 
-                    index === 1 ? "bg-zinc-300 text-zinc-700" :
-                    index === 2 ? "bg-amber-700/80 text-white" : "bg-white text-zinc-400"
-                  )}>
-                    {index + 1}
-                  </div>
-                  <div>
-                    <h4 className="text-base font-black text-zinc-900 tracking-tight">{house.houseName}</h4>
-                    <div className="flex items-center space-x-2 mt-0.5">
-                      <span className="text-[10px] font-black text-red-600 uppercase tracking-widest">{house.points.toLocaleString()} PTS</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center">
-                  {editingId === house.id ? (
-                    <div className="flex items-center space-x-2 animate-in fade-in zoom-in-95 duration-200">
-                      <input
-                        type="number"
-                        value={editPoints}
-                        onChange={(e) => setEditPoints(parseInt(e.target.value) || 0)}
-                        className="w-24 bg-white border border-zinc-200 rounded-xl px-3 py-2 text-zinc-900 text-sm font-bold focus:outline-none focus:ring-4 focus:ring-red-600/5 focus:border-red-600"
-                      />
-                      <button
-                        onClick={() => handleUpdatePoints(house.id)}
-                        className="p-2.5 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all shadow-lg shadow-red-600/20"
-                      >
-                        <Save size={18} />
-                      </button>
-                      <button
-                        onClick={() => setEditingId(null)}
-                        className="p-2.5 bg-zinc-100 text-zinc-500 rounded-xl hover:text-zinc-900 transition-all"
-                      >
-                        <X size={18} />
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setEditingId(house.id);
-                        setEditPoints(house.points);
-                      }}
-                      className="px-4 py-2 bg-white border border-zinc-200 text-zinc-500 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-zinc-50 hover:text-red-600 transition-all opacity-0 group-hover:opacity-100"
-                    >
-                      Update
-                    </button>
-                  )}
-                </div>
-              </div>
+        <div className="p-8 rounded-[32px] bg-white border border-zinc-200/60 shadow-sm h-fit">
+          <h3 className="text-xl font-black text-zinc-900 tracking-tight mb-6">Add New House</h3>
+          <form onSubmit={handleAddHouse} className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[11px] font-black text-zinc-400 uppercase tracking-widest ml-1">House Name</label>
+              <input
+                type="text"
+                required
+                value={newHouseName}
+                onChange={(e) => setNewHouseName(e.target.value)}
+                className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl px-5 py-4 text-zinc-900 focus:outline-none focus:ring-4 focus:ring-red-600/5 focus:border-red-600 transition-all placeholder:text-zinc-400 font-medium"
+                placeholder="e.g. Butler House"
+              />
             </div>
-          ))}
+            <button
+              type="submit"
+              disabled={isAdding}
+              className="w-full py-4 bg-zinc-900 hover:bg-black text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl transition-all disabled:opacity-50 flex items-center justify-center shadow-xl shadow-zinc-900/20"
+            >
+              {isAdding ? <Loader2 className="animate-spin mr-3" size={18} /> : <Plus className="mr-3" size={18} />}
+              Add House
+            </button>
+          </form>
         </div>
       </div>
     </div>
   );
 };
 
-const AlumniTab = ({ alumniList }: { alumniList: AlumniProfile[] }) => (
-  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-    <div className="p-8 rounded-[32px] bg-white border border-zinc-200/60 shadow-sm">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-black text-zinc-900 tracking-tight">Alumni Management</h2>
-          <p className="text-xs text-zinc-500 font-medium mt-1 uppercase tracking-wider">Review and manage registered alumni profiles</p>
-        </div>
-        <div className="p-3 rounded-2xl bg-blue-50 text-blue-600">
-          <Users size={24} />
-        </div>
-      </div>
+const AlumniTab = ({ 
+  alumniList, 
+  search, 
+  setSearch 
+}: { 
+  alumniList: AlumniProfile[], 
+  search: string, 
+  setSearch: (val: string) => void 
+}) => {
+  const filteredAlumni = alumniList.filter(a => 
+    a.displayName?.toLowerCase().includes(search.toLowerCase()) ||
+    a.graduationYear?.includes(search) ||
+    a.occupation?.toLowerCase().includes(search.toLowerCase())
+  );
 
-      <div className="grid grid-cols-1 gap-4">
-        {alumniList.map((person: AlumniProfile) => (
-          <div key={person.uid} className="p-5 rounded-[24px] bg-zinc-50 border border-zinc-100 group hover:border-red-200 transition-all duration-300">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="w-14 h-14 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center text-zinc-900 font-black overflow-hidden shadow-sm">
-                  {person.photoURL ? (
-                    <img src={person.photoURL} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    person.displayName?.charAt(0) || 'U'
-                  )}
-                </div>
-                <div>
-                  <h4 className="text-base font-black text-zinc-900 tracking-tight">{person.displayName}</h4>
-                  <div className="flex items-center space-x-3 mt-0.5">
-                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Class of {person.graduationYear || 'N/A'}</span>
-                    <span className="w-1 h-1 rounded-full bg-zinc-300" />
-                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{person.occupation || 'No Occupation'}</span>
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="p-8 rounded-[32px] bg-white border border-zinc-200/60 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <div>
+            <h2 className="text-2xl font-black text-zinc-900 tracking-tight">Alumni Management</h2>
+            <p className="text-xs text-zinc-500 font-medium mt-1 uppercase tracking-wider">Review and manage registered alumni profiles</p>
+          </div>
+          <div className="relative flex-1 max-w-md">
+            <input
+              type="text"
+              placeholder="Search by name, year, or occupation..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-zinc-50 border border-zinc-200 rounded-2xl px-5 py-3 text-sm text-zinc-900 focus:outline-none focus:ring-4 focus:ring-red-600/5 focus:border-red-600 transition-all placeholder:text-zinc-400 font-medium"
+            />
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400">
+              <Users size={18} />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4">
+          {filteredAlumni.map((person: AlumniProfile) => (
+            <div key={person.uid} className="p-5 rounded-[24px] bg-zinc-50 border border-zinc-100 group hover:border-red-200 transition-all duration-300">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-14 h-14 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center text-zinc-900 font-black overflow-hidden shadow-sm">
+                    {person.photoURL ? (
+                      <img src={person.photoURL} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      person.displayName?.charAt(0) || 'U'
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="text-base font-black text-zinc-900 tracking-tight">{person.displayName}</h4>
+                    <div className="flex items-center space-x-3 mt-0.5">
+                      <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Class of {person.graduationYear || 'N/A'}</span>
+                      <span className="w-1 h-1 rounded-full bg-zinc-300" />
+                      <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{person.occupation || 'No Occupation'}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={async () => {
-                    try {
-                      await updateDoc(doc(db, 'users', person.uid), {
-                        notable: !person.notable
-                      });
-                    } catch (error) {
-                      handleFirestoreError(error, OperationType.UPDATE, `users/${person.uid}`);
-                    }
-                  }}
-                  className={cn(
-                    "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm",
-                    person.notable 
-                      ? "bg-red-600 text-white shadow-red-600/20" 
-                      : "bg-white text-zinc-500 border border-zinc-200 hover:bg-zinc-50"
-                  )}
-                >
-                  {person.notable ? 'Notable' : 'Mark Notable'}
-                </button>
-                <button
-                  onClick={async () => {
-                    if (confirm('Are you sure you want to remove this user from the alumni directory?')) {
+                
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={async () => {
                       try {
                         await updateDoc(doc(db, 'users', person.uid), {
-                          role: 'guest'
+                          notable: !person.notable
                         });
                       } catch (error) {
                         handleFirestoreError(error, OperationType.UPDATE, `users/${person.uid}`);
                       }
-                    }
-                  }}
-                  className="p-3 text-zinc-400 hover:text-red-600 hover:bg-white rounded-xl transition-all shadow-sm opacity-0 group-hover:opacity-100"
-                >
-                  <Trash2 size={18} />
-                </button>
+                    }}
+                    className={cn(
+                      "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm",
+                      person.notable 
+                        ? "bg-red-600 text-white shadow-red-600/20" 
+                        : "bg-white text-zinc-500 border border-zinc-200 hover:bg-zinc-50"
+                    )}
+                  >
+                    {person.notable ? 'Notable' : 'Mark Notable'}
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (confirm('Are you sure you want to remove this user from the alumni directory?')) {
+                        try {
+                          await updateDoc(doc(db, 'users', person.uid), {
+                            role: 'guest'
+                          });
+                        } catch (error) {
+                          handleFirestoreError(error, OperationType.UPDATE, `users/${person.uid}`);
+                        }
+                      }
+                    }}
+                    className="p-3 text-zinc-400 hover:text-red-600 hover:bg-white rounded-xl transition-all shadow-sm opacity-0 group-hover:opacity-100"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-        {alumniList.length === 0 && (
-          <div className="text-center py-20 bg-zinc-50 rounded-[32px] border border-dashed border-zinc-200">
-            <div className="w-12 h-12 bg-zinc-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-zinc-400">
-              <Users size={24} />
+          ))}
+          {filteredAlumni.length === 0 && (
+            <div className="text-center py-20 bg-zinc-50 rounded-[32px] border border-dashed border-zinc-200">
+              <div className="w-12 h-12 bg-zinc-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-zinc-400">
+                <Users size={24} />
+              </div>
+              <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">No matching alumni profiles found</p>
             </div>
-            <p className="text-xs text-zinc-500 font-bold uppercase tracking-widest">No alumni profiles found</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const SettingsTab = ({ onSeedNotable }: { onSeedNotable: () => void }) => (
   <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -841,11 +1026,13 @@ export default function Admin() {
   const [user, setUser] = React.useState<FirebaseUser | null>(null);
   const [profile, setProfile] = React.useState<UserProfile | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [authError, setAuthError] = React.useState<string | null>(null);
   const [activeTab, setActiveTab] = React.useState('dashboard');
   
   // News Form State
+  const [editingNewsId, setEditingNewsId] = React.useState<string | null>(null);
   const [newsTitle, setNewsTitle] = React.useState('');
-  const [newsCategory, setNewsCategory] = React.useState('Academic');
+  const [newsCategory, setNewsCategory] = React.useState<NewsItem['category']>('Academic');
   const [newsImage, setNewsImage] = React.useState('');
   const [newsContent, setNewsContent] = React.useState('');
   const [newsList, setNewsList] = React.useState<NewsItem[]>([]);
@@ -855,6 +1042,7 @@ export default function Admin() {
   const [newsCount, setNewsCount] = React.useState(0);
   const [alumniList, setAlumniList] = React.useState<AlumniProfile[]>([]);
   const [leaderboard, setLeaderboard] = React.useState<LeaderboardEntry[]>([]);
+  const [alumniSearch, setAlumniSearch] = React.useState('');
 
   React.useEffect(() => {
     if (!profile || profile.role !== 'admin') return;
@@ -892,36 +1080,43 @@ export default function Admin() {
 
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
-      setUser(u);
-      if (u) {
-        const docRef = doc(db, 'users', u.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const existingProfile = docSnap.data() as UserProfile;
-          // Auto-upgrade if master admin email
-          if (u.email === "seldogbey234@gmail.com" && existingProfile.role !== 'admin') {
-            const updatedProfile = { ...existingProfile, role: 'admin' as const };
-            await updateDoc(docRef, { role: 'admin' });
-            setProfile(updatedProfile);
+      try {
+        setAuthError(null);
+        setUser(u);
+        if (u) {
+          const docRef = doc(db, 'users', u.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const existingProfile = docSnap.data() as UserProfile;
+            // Auto-upgrade if master admin email
+            if (u.email && u.email === "seldogbey234@gmail.com" && existingProfile.role !== 'admin') {
+              const updatedProfile = { ...existingProfile, role: 'admin' as const };
+              await updateDoc(docRef, { role: 'admin' });
+              setProfile(updatedProfile);
+            } else {
+              setProfile(existingProfile);
+            }
           } else {
-            setProfile(existingProfile);
+            // Check if default admin
+            const isAdmin = u.email && u.email === "seldogbey234@gmail.com";
+            const newProfile: UserProfile = {
+              uid: u.uid,
+              email: u.email || '',
+              displayName: u.displayName || '',
+              role: isAdmin ? 'admin' : 'guest'
+            };
+            await setDoc(docRef, newProfile);
+            setProfile(newProfile);
           }
         } else {
-          // Check if default admin
-          const isAdmin = u.email === "seldogbey234@gmail.com";
-          const newProfile: UserProfile = {
-            uid: u.uid,
-            email: u.email || '',
-            displayName: u.displayName || '',
-            role: isAdmin ? 'admin' : 'guest'
-          };
-          await setDoc(docRef, newProfile);
-          setProfile(newProfile);
+          setProfile(null);
         }
-      } else {
-        setProfile(null);
+      } catch (error: any) {
+        console.error("Error loading admin profile:", error);
+        setAuthError(error.message || "Failed to load user profile");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsubscribe();
   }, [auth, db]);
@@ -1047,21 +1242,21 @@ export default function Admin() {
     if (!profile || profile.role !== 'admin') return;
     setIsSubmitting(true);
     const notableAlumni = [
-      { displayName: "Kofi Annan", bio: "Global diplomat and Nobel Peace Prize laureate", role: 'alumni', notable: true, graduationYear: "1957", isPublic: true },
-      { displayName: "John Atta Mills", bio: "Former President of Ghana", role: 'alumni', notable: true, graduationYear: "1963", isPublic: true },
-      { displayName: "Kwegyir Aggrey", bio: "Pioneer of modern education in Ghana", role: 'alumni', notable: true, graduationYear: "1890", isPublic: true },
-      { displayName: "J. H. Kwabena Nketia", bio: "World-renowned academic in African music", role: 'alumni', notable: true, graduationYear: "1940", isPublic: true },
-      { displayName: "Kobina Sekyi", bio: "Nationalist and intellectual leader", role: 'alumni', notable: true, graduationYear: "1910", isPublic: true },
-      { displayName: "Carl Christian Reindorf", bio: "Historian and religious leader", role: 'alumni', notable: true, graduationYear: "1850", isPublic: true },
-      { displayName: "Sam Jonah", bio: "Mining magnate and top businessman", role: 'alumni', notable: true, graduationYear: "1968", isPublic: true },
-      { displayName: "Kwasi Twum", bio: "Media empire owner", role: 'alumni', notable: true, graduationYear: "1978", isPublic: true },
-      { displayName: "Edward Annan", bio: "Aviation entrepreneur", role: 'alumni', notable: true, graduationYear: "1970", isPublic: true },
-      { displayName: "Kofi Amoa-Abban", bio: "Oil & gas billionaire-level entrepreneur", role: 'alumni', notable: true, graduationYear: "2001", isPublic: true },
-      { displayName: "Moses Kwesi Baiden Jr.", bio: "Fintech and security systems leader", role: 'alumni', notable: true, graduationYear: "1983", isPublic: true },
-      { displayName: "Herman Chinery-Hesse", bio: "Pioneer of Ghana’s tech industry", role: 'alumni', notable: true, graduationYear: "1981", isPublic: true },
-      { displayName: "Isaac Sesi", bio: "Young global tech innovator", role: 'alumni', notable: true, graduationYear: "2010", isPublic: true },
-      { displayName: "Aaron Adatsi", bio: "Modern TV star", role: 'alumni', notable: true, graduationYear: "2012", isPublic: true },
-      { displayName: "RJZ", bio: "Youth music influence", role: 'alumni', notable: true, graduationYear: "2013", isPublic: true },
+      { displayName: "Kofi Annan", bio: "Global diplomat and Nobel Peace Prize laureate", role: 'alumni', notable: true, graduationYear: "1957", isPublic: true, photoURL: "https://picsum.photos/seed/kofi/400/400" },
+      { displayName: "John Atta Mills", bio: "Former President of Ghana", role: 'alumni', notable: true, graduationYear: "1963", isPublic: true, photoURL: "https://picsum.photos/seed/atta/400/400" },
+      { displayName: "Kwegyir Aggrey", bio: "Pioneer of modern education in Ghana", role: 'alumni', notable: true, graduationYear: "1890", isPublic: true, photoURL: "https://picsum.photos/seed/aggrey/400/400" },
+      { displayName: "J. H. Kwabena Nketia", bio: "World-renowned academic in African music", role: 'alumni', notable: true, graduationYear: "1940", isPublic: true, photoURL: "https://picsum.photos/seed/nketia/400/400" },
+      { displayName: "Kobina Sekyi", bio: "Nationalist and intellectual leader", role: 'alumni', notable: true, graduationYear: "1910", isPublic: true, photoURL: "https://picsum.photos/seed/sekyi/400/400" },
+      { displayName: "Carl Christian Reindorf", bio: "Historian and religious leader", role: 'alumni', notable: true, graduationYear: "1850", isPublic: true, photoURL: "https://picsum.photos/seed/reindorf/400/400" },
+      { displayName: "Sam Jonah", bio: "Mining magnate and top businessman", role: 'alumni', notable: true, graduationYear: "1968", isPublic: true, photoURL: "https://picsum.photos/seed/jonah/400/400" },
+      { displayName: "Kwasi Twum", bio: "Media empire owner", role: 'alumni', notable: true, graduationYear: "1978", isPublic: true, photoURL: "https://picsum.photos/seed/twum/400/400" },
+      { displayName: "Edward Annan", bio: "Aviation entrepreneur", role: 'alumni', notable: true, graduationYear: "1970", isPublic: true, photoURL: "https://picsum.photos/seed/edward/400/400" },
+      { displayName: "Kofi Amoa-Abban", bio: "Oil & gas billionaire-level entrepreneur", role: 'alumni', notable: true, graduationYear: "2001", isPublic: true, photoURL: "https://picsum.photos/seed/amoa/400/400" },
+      { displayName: "Moses Kwesi Baiden Jr.", bio: "Fintech and security systems leader", role: 'alumni', notable: true, graduationYear: "1983", isPublic: true, photoURL: "https://picsum.photos/seed/baiden/400/400" },
+      { displayName: "Herman Chinery-Hesse", bio: "Pioneer of Ghana’s tech industry", role: 'alumni', notable: true, graduationYear: "1981", isPublic: true, photoURL: "https://picsum.photos/seed/herman/400/400" },
+      { displayName: "Isaac Sesi", bio: "Young global tech innovator", role: 'alumni', notable: true, graduationYear: "2010", isPublic: true, photoURL: "https://picsum.photos/seed/sesi/400/400" },
+      { displayName: "Aaron Adatsi", bio: "Modern TV star", role: 'alumni', notable: true, graduationYear: "2012", isPublic: true, photoURL: "https://picsum.photos/seed/adatsi/400/400" },
+      { displayName: "RJZ", bio: "Youth music influence", role: 'alumni', notable: true, graduationYear: "2013", isPublic: true, photoURL: "https://picsum.photos/seed/rjz/400/400" },
     ];
 
     try {
@@ -1138,24 +1333,52 @@ export default function Admin() {
 
     setIsSubmitting(true);
     try {
-      await addDoc(collection(db, 'news'), {
+      const newsData = {
         title: newsTitle,
         content: newsContent,
         category: newsCategory,
         imageUrl: newsImage,
-        date: new Date().toISOString(),
+        date: editingNewsId ? newsList.find(n => n.id === editingNewsId)?.date : new Date().toISOString(),
         author: profile.displayName || 'Administrator',
         authorUid: profile.uid
-      });
+      };
+
+      if (editingNewsId) {
+        await updateDoc(doc(db, 'news', editingNewsId), newsData);
+        alert('News article updated successfully!');
+      } else {
+        await addDoc(collection(db, 'news'), newsData);
+        alert('News article published successfully!');
+      }
+      
       setNewsTitle('');
       setNewsContent('');
       setNewsImage('');
-      alert('News article published successfully!');
+      setEditingNewsId(null);
+      setShowPreview(false);
     } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, 'news');
+      handleFirestoreError(error, editingNewsId ? OperationType.UPDATE : OperationType.WRITE, 'news');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleEditNews = (item: NewsItem) => {
+    setEditingNewsId(item.id);
+    setNewsTitle(item.title);
+    setNewsContent(item.content);
+    setNewsCategory(item.category);
+    setNewsImage(item.imageUrl || '');
+    setShowPreview(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingNewsId(null);
+    setNewsTitle('');
+    setNewsContent('');
+    setNewsImage('');
+    setShowPreview(false);
   };
 
   if (loading) return (
@@ -1177,7 +1400,16 @@ export default function Admin() {
           </div>
           <h1 className="text-2xl font-bold text-zinc-900 mb-2">Admin Portal</h1>
           <p className="text-zinc-500 text-sm font-medium mb-8">
-            {user ? "Access denied. You do not have administrative privileges." : "Please sign in to access the management suite."}
+            {authError ? (
+              <span className="text-red-600 flex items-center justify-center gap-2">
+                <X size={14} />
+                {authError}
+              </span>
+            ) : user ? (
+              "Access denied. You do not have administrative privileges."
+            ) : (
+              "Please sign in to access the management suite."
+            )}
           </p>
 
           <button
@@ -1323,6 +1555,7 @@ export default function Admin() {
                   seedLeaderboard={seedLeaderboard}
                   seedNotableAlumni={seedNotableAlumni}
                   leaderboard={leaderboard}
+                  newsList={newsList}
                 />
               )}
               {activeTab === 'news' && (
@@ -1340,6 +1573,9 @@ export default function Admin() {
                   setNewsContent={setNewsContent}
                   showPreview={showPreview}
                   setShowPreview={setShowPreview}
+                  editingNewsId={editingNewsId}
+                  handleEditNews={handleEditNews}
+                  cancelEdit={cancelEdit}
                 />
               )}
               {activeTab === 'leaderboard' && (
@@ -1351,6 +1587,8 @@ export default function Admin() {
               {activeTab === 'alumni' && (
                 <AlumniTab 
                   alumniList={alumniList}
+                  search={alumniSearch}
+                  setSearch={setAlumniSearch}
                 />
               )}
               {activeTab === 'settings' && (

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Filter, User, GraduationCap, Briefcase, MapPin, Linkedin, ExternalLink, Loader2, X, CheckCircle2, AlertCircle, LogIn, Network, ShieldCheck } from 'lucide-react';
+import { Search, Filter, User, GraduationCap, Briefcase, MapPin, Linkedin, ExternalLink, Loader2, X, CheckCircle2, AlertCircle, LogIn, Network, ShieldCheck, Star } from 'lucide-react';
 import { collection, onSnapshot, query, where, doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/src/firebase';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User as FirebaseUser } from 'firebase/auth';
@@ -98,7 +98,7 @@ export default function AlumniDirectory() {
         ...formData,
         uid: user.uid,
         email: user.email,
-        role: 'alumni'
+        role: userProfile?.role === 'admin' ? 'admin' : 'alumni'
       };
       await setDoc(docRef, updatedProfile, { merge: true });
       setUserProfile(updatedProfile as AlumniProfile);
@@ -355,7 +355,15 @@ export default function AlumniDirectory() {
                   </div>
                   <div>
                     <h2 className="text-3xl font-black text-zinc-900 uppercase tracking-tighter leading-none mb-2">Alumni_Registration</h2>
-                    <p className="text-zinc-400 text-[10px] font-mono font-black uppercase tracking-[0.3em]">Identity_Management_System</p>
+                    <div className="flex items-center space-x-2">
+                      <p className="text-zinc-400 text-[10px] font-mono font-black uppercase tracking-[0.3em]">Identity_Management_System</p>
+                      {userProfile?.notable && (
+                        <div className="flex items-center space-x-1 px-2 py-0.5 bg-red-600 text-white rounded-md text-[8px] font-black uppercase tracking-widest">
+                          <Star size={8} className="fill-white" />
+                          <span>Notable_Alumnus</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <button 

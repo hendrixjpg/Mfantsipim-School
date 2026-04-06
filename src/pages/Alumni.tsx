@@ -4,8 +4,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Users, GraduationCap, Heart, Briefcase, Globe, ArrowRight, 
   Network, Award, Star, Search, Filter, ExternalLink, ShieldCheck,
-  Linkedin
+  Linkedin, LogIn, Loader2, User
 } from 'lucide-react';
+import { auth, db } from '@/src/firebase';
+import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User as FirebaseUser } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { UserProfile } from '@/src/types';
 import { cn } from '@/src/lib/utils';
 
 const NOTABLE_ALUMNI = [
@@ -73,6 +77,39 @@ const FEATURED_ALUMNI = [
 
 export default function Alumni() {
   const [activeSection, setActiveSection] = React.useState<'network' | 'notable'>('network');
+  const [user, setUser] = React.useState<FirebaseUser | null>(null);
+  const [profile, setProfile] = React.useState<UserProfile | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = React.useState(false);
+
+  React.useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (u) => {
+      setUser(u);
+      if (u) {
+        const docRef = doc(db, 'users', u.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setProfile(docSnap.data() as UserProfile);
+        }
+      } else {
+        setProfile(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogin = async () => {
+    if (isLoggingIn) return;
+    setIsLoggingIn(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await signInWithPopup(auth, provider);
+    } catch (error: any) {
+      console.error("Login error:", error);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
 
   return (
     <div className="bg-[var(--background)] min-h-screen selection:bg-red-600/20 selection:text-red-600">
@@ -246,12 +283,24 @@ export default function Alumni() {
                     >
                       Browse Directory
                     </Link>
-                    <Link 
-                      to="/alumni/directory"
-                      className="w-full sm:w-auto px-12 py-5 border border-white/10 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl hover:bg-white/5 transition-all text-center"
-                    >
-                      Register Profile
-                    </Link>
+                    {user ? (
+                      <Link 
+                        to="/alumni/directory"
+                        className="w-full sm:w-auto px-12 py-5 border border-white/10 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl hover:bg-white/5 transition-all text-center flex items-center justify-center space-x-3"
+                      >
+                        <User size={16} />
+                        <span>Manage Profile</span>
+                      </Link>
+                    ) : (
+                      <button 
+                        onClick={handleLogin}
+                        disabled={isLoggingIn}
+                        className="w-full sm:w-auto px-12 py-5 border border-white/10 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl hover:bg-white/5 transition-all text-center flex items-center justify-center space-x-3 disabled:opacity-50"
+                      >
+                        {isLoggingIn ? <Loader2 className="animate-spin" size={16} /> : <LogIn size={16} />}
+                        <span>{isLoggingIn ? "Authenticating..." : "Register Profile"}</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

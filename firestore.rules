@@ -53,7 +53,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated() &&
-        (request.auth.token.email == "seldogbey234@gmail.com" ||
+        ((request.auth.token.email == "seldogbey234@gmail.com" && request.auth.token.email_verified == true) ||
          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'));
     }
@@ -99,7 +99,8 @@ service cloud.firestore {
              (!('location' in data) || (data.location is string && data.location.size() < 100)) &&
              (!('bio' in data) || (data.bio is string && data.bio.size() < 500)) &&
              (!('linkedin' in data) || (data.linkedin is string && data.linkedin.size() < 200)) &&
-             (!('isPublic' in data) || (data.isPublic is bool));
+             (!('isPublic' in data) || (data.isPublic is bool)) &&
+             (!('notable' in data) || (data.notable is bool));
     }
 
     // ===============================================================
@@ -109,9 +110,11 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin() || (resource.data.role == 'alumni' && resource.data.isPublic == true);
       allow create: if isOwner(userId) && isValidUser(request.resource.data) && 
-                    (request.resource.data.role != 'admin' || isAdmin());
+                    (request.resource.data.role != 'admin' || isAdmin()) &&
+                    (!('notable' in request.resource.data) || isAdmin());
       allow update: if (isOwner(userId) && isValidUser(request.resource.data) && 
-                    (request.resource.data.role == resource.data.role || isAdmin())) ||
+                    (request.resource.data.role == resource.data.role || isAdmin()) &&
+                    (request.resource.data.get('notable', resource.data.get('notable', false)) == resource.data.get('notable', false) || isAdmin())) ||
                     isAdmin();
     }
 
