@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { Navbar, Footer, BottomNav } from '@/src/components/Layout';
@@ -12,7 +12,8 @@ import AlumniDirectory from '@/src/pages/AlumniDirectory';
 import Contact from '@/src/pages/Contact';
 import Admin from '@/src/pages/Admin';
 import Leadership from '@/src/pages/Leadership';
-import ChatBot from '@/src/components/ChatBot';
+import Login from '@/src/components/Login';
+import { debugFirebase } from '@/src/services/firebaseDebug';
 import { Analytics } from '@vercel/analytics/react';
 
 function PageTransition({ children }: { children: React.ReactNode }) {
@@ -37,6 +38,14 @@ function PageTransition({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    // Run debug in development/preview builds
+    if ((import.meta as any).env?.DEV) {
+      const debugInfo = debugFirebase();
+      console.log('🔧 Firebase Debug Info:', debugInfo);
+    }
+  }, []);
+
   return (
     <Router>
       <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] selection:bg-red-600 selection:text-white relative overflow-x-hidden transition-colors duration-300">
@@ -54,13 +63,13 @@ export default function App() {
               <Route path="/alumni/directory" element={<AlumniDirectory />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/admissions" element={<Contact />} />
             </Routes>
           </PageTransition>
         </main>
         <Footer />
         <BottomNav />
-        <ChatBot />
         <Analytics />
       </div>
     </Router>

@@ -31,13 +31,24 @@ export default function News() {
   React.useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const docRef = doc(db, 'users', user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const profile = docSnap.data() as UserProfile;
-          setIsAdmin(profile.role === 'admin');
-        } else if (user.email === "seldogbey234@gmail.com") {
-          setIsAdmin(true);
+        try {
+          const docRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const profile = docSnap.data() as UserProfile;
+            setIsAdmin(profile.role === 'admin');
+          } else if (user.email === "seldogbey234@gmail.com") {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
+        } catch (error) {
+          console.error("Error checking admin profile state:", error);
+          if (user.email === "seldogbey234@gmail.com") {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
         }
       } else {
         setIsAdmin(false);

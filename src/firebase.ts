@@ -1,16 +1,33 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { initializeFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../firebase-applet-config.json';
 
 const app = initializeApp(firebaseConfig);
 
-// Using initializeFirestore with experimentalForceLongPolling to handle potential network/proxy issues
+// Using initializeFirestore with experimentalForceLongPolling and useFetchStreams: false to handle potential network/proxy/sandbox issues
 export const db = initializeFirestore(app, {
   experimentalForceLongPolling: true,
-}, firebaseConfig.firestoreDatabaseId);
+  useFetchStreams: false,
+} as any, firebaseConfig.firestoreDatabaseId);
 
 export const auth = getAuth(app);
+
+// Initialize Google Provider
+import { GoogleAuthProvider } from 'firebase/auth';
+export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account' // Forces account selection
+});
+
+// Set persistence to LOCAL (survives browser restarts)
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log("✅ Auth persistence set to LOCAL");
+  })
+  .catch((error) => {
+    console.error("❌ Persistence error:", error);
+  });
 
 // Validate Connection to Firestore
 async function testConnection() {

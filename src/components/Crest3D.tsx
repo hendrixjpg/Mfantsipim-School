@@ -22,15 +22,19 @@ function InteractiveGroup({ children }: { children: React.ReactNode }) {
 
   useFrame((state, delta) => {
     if (!groupRef.current) return;
-    // Base continuous rotation
-    groupRef.current.rotation.y += delta * 0.45;
     
-    // Smooth tilt based on mouse position
-    const targetX = mouse.y * 0.4;
-    const targetZ = -mouse.x * 0.4;
+    // Slow prestigious yaw oscillation (sway) instead of full spinning 360, 
+    // so the intricate face of the crest (foundation date, stripes, gold stars, banner) 
+    // is always beautifully visible and interactable.
+    const time = state.clock.getElapsedTime();
+    const baseRotationY = Math.sin(time * 0.45) * 0.35; 
     
-    groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, targetX, 0.1);
-    groupRef.current.rotation.z = THREE.MathUtils.lerp(groupRef.current.rotation.z, targetZ, 0.1);
+    // Smooth tilt/yaw based on mouse position
+    const targetX = mouse.y * 0.3;
+    const targetY = baseRotationY + (mouse.x * 0.4);
+    
+    groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, targetX, 0.08);
+    groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, targetY, 0.08);
   });
 
   return (
