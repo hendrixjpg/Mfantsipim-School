@@ -3,24 +3,15 @@ import { motion } from 'motion/react';
 import { ArrowRight, Trophy, Users, GraduationCap, Loader2, CheckCircle2, Star, Shield, Home as HomeIcon, Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SCHOOL_INFO } from '@/src/constants';
-import Leaderboard from '@/src/components/Leaderboard';
 import Achievements from '@/src/components/Achievements';
+import GlobalGlobe from '@/src/components/GlobalGlobe';
+import Crest3D from '@/src/components/Crest3D';
 import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/src/firebase';
 import { NewsItem } from '@/src/types';
 import { format } from 'date-fns';
 
-const SCHOOL_HOUSES = [
-  { name: 'Abruquah', color: '#FACC15', desc: 'Named after the first African Headmaster, representing excellence and pioneering spirit.', icon: 'A' },
-  { name: 'Balmer', color: '#3B82F6', desc: 'Named after Rev. W. T. Balmer, focusing on academic brilliance and spiritual growth.', icon: 'B' },
-  { name: 'Bartels', color: '#22C55E', desc: 'Named after F. L. Bartels, emphasizing leadership and global citizenship.', icon: 'B' },
-  { name: 'Freeman', color: '#EF4444', desc: 'Named after Rev. Thomas Birch Freeman, the founder of the Methodist Church in Ghana.', icon: 'F' },
-  { name: 'Lockhart', color: '#A855F7', desc: 'Named after Rev. R. A. Lockhart, known for discipline and athletic prowess.', icon: 'L' },
-  { name: 'Sarbah', color: '#71717A', desc: 'Named after John Mensah Sarbah, focusing on law, intellectualism, and heritage.', icon: 'S' },
-  { name: 'Schweitzer', color: '#F97316', desc: 'Named after Albert Schweitzer, emphasizing humanitarian service and compassion.', icon: 'S' },
-  { name: 'Pickard', color: '#78350F', desc: 'Named after Rev. Pickard, representing resilience and steadfast character.', icon: 'P' },
-];
-
+// Featured old boys from Mfantsipim
 const FEATURED_ALUMNI = [
   {
     name: "Kofi Annan",
@@ -76,36 +67,51 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-[var(--background)]/50 via-transparent to-[var(--background)]"></div>
         </div>
 
-        <div className="container-custom relative z-10">
-          <div className="max-w-3xl">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-600/10 text-red-600 rounded-full text-xs font-bold uppercase tracking-widest mb-8">
-                <Star size={14} fill="currentColor" />
-                Est. 1876 • First in Ghana
-              </div>
-              
-              <h1 className="text-5xl md:text-7xl font-black text-[var(--foreground)] uppercase tracking-tight mb-6 leading-[1.1]">
-                Dwen Hwe Kan: <br />
-                <span className="text-red-600">Think and Look Ahead</span>
-              </h1>
-              
-              <p className="text-lg md:text-xl text-[var(--muted-foreground)] font-medium mb-10 leading-relaxed max-w-2xl">
-                Mfantsipim School is more than an institution; it is a legacy of excellence, character, and leadership that has shaped the nation for over a century.
-              </p>
+        <div className="container-custom relative z-10 py-12 lg:py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            {/* Left Column (Brand Mission & CTA) */}
+            <div className="lg:col-span-7">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6 }}
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-600/10 text-red-600 rounded-full text-xs font-bold uppercase tracking-widest mb-8">
+                  <Star size={14} fill="currentColor" />
+                  Est. 1876 • First in Ghana
+                </div>
+                
+                <h1 className="text-5xl md:text-7xl font-black text-[var(--foreground)] uppercase tracking-tight mb-6 leading-[1.1]">
+                  Dwen Hwe Kan: <br />
+                  <span className="text-red-600">Think and Look Ahead</span>
+                </h1>
+                
+                <p className="text-lg md:text-xl text-[var(--muted-foreground)] font-medium mb-10 leading-relaxed max-w-2xl">
+                  Mfantsipim School is more than an institution; it is a legacy of excellence, character, and leadership that has shaped the nation for over a century.
+                </p>
 
-              <div className="flex flex-wrap gap-4">
-                <Link to="/about" className="btn-primary flex items-center group">
-                  Our Heritage <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link to="/admissions" className="btn-secondary">
-                  Admissions
-                </Link>
-              </div>
-            </motion.div>
+                <div className="flex flex-wrap gap-4">
+                  <Link to="/about" className="btn-primary flex items-center group">
+                    Our Heritage <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                  <Link to="/admissions" className="btn-secondary">
+                    Admissions
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Right Column (Rotating 3D Crest) */}
+            <div className="lg:col-span-5 w-full h-[380px] md:h-[480px] lg:h-[520px] flex items-center justify-center">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="w-full h-full"
+              >
+                <Crest3D />
+              </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -163,75 +169,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* School Houses */}
-      <section className="section-padding bg-white relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,rgba(220,38,38,0.02)_0%,transparent_50%)] pointer-events-none" />
-        <div className="container-custom relative z-10">
-          <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6">
-            <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-zinc-100 text-zinc-500 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-6 border border-zinc-200">
-                <HomeIcon size={12} />
-                The_Fraternity // School_Houses
-              </div>
-              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none mb-6">
-                Our <span className="text-red-600">Houses</span>
-              </h2>
-              <p className="text-[var(--muted-foreground)] text-lg font-medium leading-relaxed">
-                The house system is the heartbeat of Mfantsipim, fostering healthy competition, lifelong brotherhood, and leadership skills.
-              </p>
-            </div>
-            <div className="hidden md:block">
-              <div className="w-24 h-1 bg-red-600/20 rounded-full" />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {SCHOOL_HOUSES.map((house, i) => (
-              <motion.div
-                key={house.name}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                whileHover={{ y: -10 }}
-                className="p-10 rounded-[40px] bg-white border border-zinc-200 hover:border-red-600/30 transition-all group shadow-sm hover:shadow-xl relative overflow-hidden"
-              >
-                <div 
-                  className="absolute top-0 left-0 w-full h-1.5 opacity-80"
-                  style={{ backgroundColor: house.color }}
-                />
-                
-                <div className="flex items-center justify-between mb-8">
-                  <div 
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-lg transition-transform group-hover:scale-110"
-                    style={{ backgroundColor: house.color }}
-                  >
-                    {house.icon}
-                  </div>
-                  <Shield className="text-zinc-100 group-hover:text-red-600/10 transition-colors" size={48} />
-                </div>
-
-                <h3 className="text-2xl font-black text-zinc-900 uppercase tracking-tighter mb-4 group-hover:text-red-600 transition-colors">
-                  {house.name} <span className="text-zinc-300">House</span>
-                </h3>
-                
-                <p className="text-zinc-500 text-sm leading-relaxed font-medium mb-8">
-                  {house.desc}
-                </p>
-
-                <div className="flex items-center text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] pt-6 border-t border-zinc-50">
-                  <div className="w-2 h-2 rounded-full mr-3" style={{ backgroundColor: house.color }} />
-                  House_Identity // Active
-                </div>
-
-                {/* HUD corners */}
-                <div className="absolute top-0 left-0 w-8 h-8 border-t border-l border-zinc-100 rounded-tl-[40px] group-hover:border-red-600/20 transition-colors" />
-                <div className="absolute bottom-0 right-0 w-8 h-8 border-b border-r border-zinc-100 rounded-br-[40px] group-hover:border-red-600/20 transition-colors" />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <GlobalGlobe />
 
       {/* Featured Alumni */}
       <section className="section-padding bg-[var(--muted)]">
@@ -311,14 +249,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Leaderboard & Achievements */}
+      {/* Achievements */}
       <section className="section-padding bg-[var(--muted)]">
         <div className="container-custom">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div className="card-base p-8 shadow-xl bg-[var(--card)]">
-              <Leaderboard />
-            </div>
-            <div className="card-base p-8 shadow-xl bg-[var(--card)]">
+          <div className="max-w-4xl mx-auto">
+            <div className="card-base p-8 md:p-12 shadow-xl bg-[var(--card)]">
               <Achievements />
             </div>
           </div>

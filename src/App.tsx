@@ -13,6 +13,7 @@ import Contact from '@/src/pages/Contact';
 import Admin from '@/src/pages/Admin';
 import Leadership from '@/src/pages/Leadership';
 import ChatBot from '@/src/components/ChatBot';
+import { Analytics } from '@vercel/analytics/react';
 
 function PageTransition({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -60,6 +61,7 @@ export default function App() {
         <Footer />
         <BottomNav />
         <ChatBot />
+        <Analytics />
       </div>
     </Router>
   );

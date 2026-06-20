@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { History, Target, Eye, ShieldCheck, Users, GraduationCap } from 'lucide-react';
 import { SCHOOL_INFO } from '@/src/constants';
 import { cn } from '@/src/lib/utils';
+import SchoolHouses from '@/src/components/SchoolHouses';
 
 export default function About() {
   return (
@@ -133,6 +134,13 @@ export default function About() {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* School Houses Section */}
+      <section className="py-24 bg-[var(--muted)] border-t border-[var(--border)]">
+        <div className="container-custom">
+          <SchoolHouses />
         </div>
       </section>
     </div>

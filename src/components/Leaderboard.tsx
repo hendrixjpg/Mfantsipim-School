@@ -74,8 +74,9 @@ export default function Leaderboard() {
               exit={{ opacity: 0, scale: 0.98 }}
               transition={{ 
                 type: 'spring', 
-                stiffness: 400, 
-                damping: 40
+                stiffness: 280, 
+                damping: 24,
+                mass: 0.8
               }}
               className={cn(
                 "flex items-center justify-between p-5 rounded-2xl transition-all group relative border border-[var(--border)]",

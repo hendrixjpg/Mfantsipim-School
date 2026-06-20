@@ -72,7 +72,7 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 
 // --- Sub-components ---
 
-const StatCard = ({ label, value, icon: Icon, color, trend }: { label: string, value: string, icon: React.ElementType, color: string, trend?: string }) => (
+const StatCard = ({ label, value, icon: Icon, color, trend }: { label: string, value: string, icon: any, color: string, trend?: string }) => (
   <div className="p-6 rounded-[24px] bg-white border border-zinc-200/60 shadow-sm hover:shadow-xl hover:shadow-red-600/5 transition-all duration-300 group">
     <div className="flex items-center justify-between mb-4">
       <div className={cn("p-3 rounded-2xl transition-colors duration-300", color.replace('text-', 'bg-').concat('/10'), "group-hover:".concat(color.replace('text-', 'bg-').concat('/20')))}>
@@ -89,7 +89,7 @@ const StatCard = ({ label, value, icon: Icon, color, trend }: { label: string, v
   </div>
 );
 
-const QuickAction = ({ label, icon: Icon, onClick, description, variant = 'default' }: { label: string, icon: React.ElementType, onClick: () => void, description: string, variant?: 'default' | 'danger' }) => (
+const QuickAction = ({ label, icon: Icon, onClick, description, variant = 'default' }: { label: string, icon: any, onClick: () => void, description: string, variant?: 'default' | 'danger' }) => (
   <button
     onClick={onClick}
     className={cn(

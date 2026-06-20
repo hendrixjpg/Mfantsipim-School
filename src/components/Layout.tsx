@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, GraduationCap, Trophy, Newspaper, Users, Phone, Home, ShieldCheck, MoreHorizontal, MessageSquare } from 'lucide-react';
+import { X, GraduationCap, Trophy, Newspaper, Users, Phone, Home, ShieldCheck, MoreHorizontal, MessageSquare, Mail, Check, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { SCHOOL_INFO } from '@/src/constants';
 import FeedbackModal from '@/src/components/FeedbackModal';
@@ -185,11 +185,55 @@ export function BottomNav() {
 
 export function Footer() {
   const [isFeedbackOpen, setIsFeedbackOpen] = React.useState(false);
+  const [email, setEmail] = React.useState('');
+  const [error, setError] = React.useState('');
+  const [isSubscribing, setIsSubscribing] = React.useState(false);
+  const [toast, setToast] = React.useState<{ title: string; message: string; type: 'success' | 'error' } | null>(null);
+
+  React.useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail) {
+      setError('Email address is required.');
+      return;
+    }
+
+    // Regexp checking for educational or official school domains (e.g. .edu.gh, .edu, moba.org)
+    const SCHOOL_EMAIL_REGEX = /^[A-Z0-9._%+-]+@(?:[A-Z0-9-]+\.)*(?:mfantsipim\.edu\.gh|moba\.org|moba\.edu|edu\.gh|edu)$/i;
+
+    if (!SCHOOL_EMAIL_REGEX.test(trimmedEmail)) {
+      setError('Please use a school/MOBA email (e.g., @mfantsipim.edu.gh, @moba.org, or any .edu/.edu.gh address).');
+      return;
+    }
+
+    setIsSubscribing(true);
+    setTimeout(() => {
+      setIsSubscribing(false);
+      setEmail('');
+      setToast({
+        title: 'Subscription Successful',
+        message: `Welcome aboard! Updates will be dispatched to ${trimmedEmail}`,
+        type: 'success',
+      });
+    }, 1200);
+  };
 
   return (
     <footer className="bg-[var(--muted)] text-[var(--foreground)] py-20 relative overflow-hidden border-t border-[var(--border)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 flex items-center justify-center">
@@ -232,13 +276,55 @@ export function Footer() {
               <li>
                 <button 
                   onClick={() => setIsFeedbackOpen(true)}
-                  className="hover:text-red-600 transition-colors flex items-center"
+                  className="hover:text-red-600 transition-colors flex items-center cursor-pointer"
                 >
                   Portal Feedback
                 </button>
               </li>
               <li><Link to="/contact" className="hover:text-red-600 transition-colors">Help Center</Link></li>
             </ul>
+          </div>
+
+          {/* Newsletter subscription column with school-related address checks */}
+          <div className="space-y-5 lg:col-span-1">
+            <h3 className="font-bold text-red-500 uppercase tracking-widest text-xs">Kwabotwe Gazette</h3>
+            <p className="text-[var(--muted-foreground)] text-xs leading-relaxed">
+              Subscribe with an educational or old boy digital identity to receive legacy notifications.
+            </p>
+            <form onSubmit={handleSubscribe} className="space-y-3">
+              <div className="relative">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError('');
+                  }}
+                  placeholder="Enter school/MOBA email..."
+                  className={cn(
+                    "w-full bg-zinc-900 border text-xs px-4 py-3 rounded-xl focus:outline-none transition-all placeholder:text-zinc-600 text-white pr-10",
+                    error ? "border-red-600 focus:ring-1 focus:ring-red-600" : "border-zinc-800 focus:border-red-600 focus:ring-1 focus:ring-red-600/30"
+                  )}
+                />
+                <button
+                  type="submit"
+                  disabled={isSubscribing}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 text-zinc-400 hover:text-red-600 transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {isSubscribing ? (
+                    <Loader2 size={14} className="animate-spin text-red-600" />
+                  ) : (
+                    <Mail size={14} />
+                  )}
+                </button>
+              </div>
+              {error && (
+                <div className="flex items-start gap-1.5 text-[10px] font-semibold text-red-500 leading-tight">
+                  <AlertCircle size={12} className="flex-shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
+            </form>
           </div>
         </div>
         
@@ -250,6 +336,31 @@ export function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Real-time custom toast alert system */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+            className="fixed bottom-24 right-6 md:bottom-8 md:right-8 z-50 max-w-sm bg-zinc-950 border border-zinc-800 rounded-2xl p-5 shadow-2xl flex gap-3.5 items-start"
+          >
+            <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-500">
+              <Check size={16} />
+            </div>
+            <div className="space-y-1">
+              <h4 className="text-white text-xs font-black uppercase tracking-wider">{toast.title}</h4>
+              <p className="text-zinc-400 text-[11px] leading-relaxed font-semibold">{toast.message}</p>
+            </div>
+            <button onClick={() => setToast(null)} className="text-zinc-500 hover:text-zinc-300 p-1 cursor-pointer">
+              <X size={14} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <FeedbackModal isOpen={isFeedbackOpen} onClose={() => setIsFeedbackOpen(false)} />
     </footer>
   );
