@@ -7,6 +7,57 @@ import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User as Fireba
 import { AlumniProfile } from '@/src/types';
 import { cn } from '@/src/lib/utils';
 
+enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId: string | undefined;
+    email: string | null | undefined;
+    emailVerified: boolean | undefined;
+    isAnonymous: boolean | undefined;
+    tenantId: string | null | undefined;
+    providerInfo: {
+      providerId: string;
+      displayName: string | null;
+      email: string | null;
+      photoUrl: string | null;
+    }[];
+  };
+}
+
+function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map(provider => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL,
+      })) || []
+    },
+    operationType,
+    path
+  };
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
+
 export default function AlumniDirectory() {
   const [alumni, setAlumni] = React.useState<AlumniProfile[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -36,19 +87,33 @@ export default function AlumniDirectory() {
       setUser(u);
       if (u) {
         const docRef = doc(db, 'users', u.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const profile = docSnap.data() as AlumniProfile;
-          setUserProfile(profile);
-          setFormData({
-            displayName: profile.displayName || '',
-            graduationYear: profile.graduationYear || '',
-            occupation: profile.occupation || '',
-            location: profile.location || '',
-            bio: profile.bio || '',
-            linkedin: profile.linkedin || '',
-            isPublic: profile.isPublic ?? true
-          });
+        try {
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const profile = docSnap.data() as AlumniProfile;
+            setUserProfile(profile);
+            setFormData({
+              displayName: profile.displayName || '',
+              graduationYear: profile.graduationYear || '',
+              occupation: profile.occupation || '',
+              location: profile.location || '',
+              bio: profile.bio || '',
+              linkedin: profile.linkedin || '',
+              isPublic: profile.isPublic ?? true
+            });
+          } else {
+            setFormData({
+              displayName: u.displayName || '',
+              graduationYear: '',
+              occupation: '',
+              location: '',
+              bio: '',
+              linkedin: '',
+              isPublic: true
+            });
+          }
+        } catch (error) {
+          handleFirestoreError(error, OperationType.GET, `users/${u.uid}`);
         }
       }
     });
@@ -64,7 +129,7 @@ export default function AlumniDirectory() {
       setAlumni(data);
       setLoading(false);
     }, (error) => {
-      console.error("Alumni fetch error:", error);
+      handleFirestoreError(error, OperationType.GET, 'users');
       setLoading(false);
     });
 
@@ -97,14 +162,14 @@ export default function AlumniDirectory() {
       const updatedProfile = {
         ...formData,
         uid: user.uid,
-        email: user.email,
-        role: userProfile?.role === 'admin' ? 'admin' : 'alumni'
+        email: user.email || '',
+        role: userProfile?.role === 'admin' ? 'admin' : (userProfile?.role === 'student' ? 'student' : 'alumni')
       };
       await setDoc(docRef, updatedProfile, { merge: true });
       setUserProfile(updatedProfile as AlumniProfile);
       setShowProfileModal(false);
     } catch (error) {
-      console.error("Update profile error:", error);
+      handleFirestoreError(error, OperationType.WRITE, `users/${user.uid}`);
     } finally {
       setIsSubmitting(false);
     }
