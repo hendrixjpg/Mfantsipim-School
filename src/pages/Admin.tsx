@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { cn } from '@/src/lib/utils';
 import { auth, db } from '@/src/firebase';
+import Login from '@/src/components/Login';
 import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { 
   collection, addDoc, onSnapshot, query, orderBy, deleteDoc, 
@@ -1387,7 +1388,26 @@ export default function Admin() {
     </div>
   );
 
-  if (!user || profile?.role !== 'admin') {
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-50 py-12">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-red-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-red-600/20">
+              <ShieldCheck className="text-white" size={32} />
+            </div>
+            <h1 className="text-2xl font-bold text-zinc-900 leading-tight">Admin Portal</h1>
+            <p className="text-zinc-500 text-sm font-medium mt-1">
+              Sign in with administrative privileges
+            </p>
+          </div>
+          <Login />
+        </div>
+      </div>
+    );
+  }
+
+  if (profile?.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 bg-zinc-50">
         <motion.div
@@ -1399,33 +1419,19 @@ export default function Admin() {
             <ShieldCheck className="text-white" size={32} />
           </div>
           <h1 className="text-2xl font-bold text-zinc-900 mb-2">Admin Portal</h1>
-          <p className="text-zinc-500 text-sm font-medium mb-8">
-            {authError ? (
-              <span className="text-red-600 flex items-center justify-center gap-2">
-                <X size={14} />
-                {authError}
-              </span>
-            ) : user ? (
-              "Access denied. You do not have administrative privileges."
-            ) : (
-              "Please sign in to access the management suite."
-            )}
+          <p className="text-red-500 text-sm font-semibold mb-2">
+            Access denied. You do not have administrative privileges.
           </p>
-
+          <p className="text-zinc-500 text-xs font-mono mb-8">
+            Signed in as: {user.email}
+          </p>
           <button
-            onClick={user ? handleLogout : handleLogin}
-            disabled={isLoggingIn}
-            className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl transition-all flex items-center justify-center space-x-3 disabled:opacity-50 shadow-lg shadow-red-600/20"
+            onClick={handleLogout}
+            className="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl transition-all flex items-center justify-center space-x-3 shadow-lg shadow-red-600/20"
           >
-            {isLoggingIn ? <Loader2 className="animate-spin" size={20} /> : <LogIn size={20} />}
-            <span>{user ? "Sign Out" : isLoggingIn ? "Authenticating..." : "Sign In with Google"}</span>
+            <LogOut size={20} />
+            <span>Sign Out & Try Another Account</span>
           </button>
-          
-          {!user && (
-            <p className="mt-6 text-xs text-zinc-400">
-              Only authorized personnel can access this area.
-            </p>
-          )}
         </motion.div>
       </div>
     );

@@ -96,36 +96,6 @@ export default function Login() {
     );
   }
 
-  // Show domain warning banner
-  if (domainWarning) {
-    return (
-      <div className="max-w-md mx-auto my-12 p-8 bg-amber-50 border-2 border-amber-500 rounded-2xl shadow-xl font-sans" id="domain-warning-card">
-        <div className="flex items-center gap-3 mb-4 text-amber-700">
-          <ShieldAlert className="w-8 h-8 flex-shrink-0" />
-          <h3 className="text-xl font-bold font-display tracking-tight leading-none">Domain Authorization Required</h3>
-        </div>
-        <p className="text-sm text-amber-800 mb-6 leading-relaxed">
-          The domain <strong className="font-semibold text-amber-950">"{window.location.hostname}"</strong> is not authorized in Firebase Console yet. Follow these simple steps:
-        </p>
-        <ol className="list-decimal list-inside space-y-3 text-sm text-amber-900 mb-8 font-medium pl-1">
-          <li>Open your <strong className="text-amber-950">Firebase Console</strong></li>
-          <li>Select your active project</li>
-          <li>Go to <strong className="text-amber-950">Authentication &rarr; Settings</strong></li>
-          <li>Find <strong className="text-amber-950">Authorized Domains</strong> and click "Add Domain"</li>
-          <li>Add: <code className="bg-amber-100/80 px-2 py-0.5 rounded font-mono text-xs border border-amber-200">{window.location.hostname}</code></li>
-          <li>Save changes and refresh below</li>
-        </ol>
-        <button 
-          onClick={() => window.location.reload()}
-          className="w-full bg-amber-800 hover:bg-amber-900 text-white font-semibold py-3 px-6 rounded-xl transition duration-150 active:scale-95 shadow-lg shadow-amber-800/10"
-          id="refresh-domain-button"
-        >
-          Refresh After Adding Domain
-        </button>
-      </div>
-    );
-  }
-
   // Show user info if logged in
   if (user) {
     return (
@@ -219,6 +189,12 @@ export default function Login() {
         )}
         <span className="text-sm tracking-wide">{submitting ? 'Redirecting...' : 'Continue with Google'}</span>
       </button>
+
+      {domainWarning && (
+        <p className="text-[10px] text-amber-600 dark:text-amber-500 font-semibold mt-2.5 leading-snug text-center">
+          ⚠️ Note: "{window.location.hostname}" is not configured in Firebase Console for Google login. Try Email/Password details below if Google fails.
+        </p>
+      )}
 
       <div className="relative flex py-5 items-center">
         <div className="flex-grow border-t border-zinc-200"></div>

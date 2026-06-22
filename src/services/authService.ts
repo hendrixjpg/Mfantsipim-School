@@ -83,7 +83,9 @@ export const checkDomainAuthorization = (): boolean => {
     'firebaseapp.com',
     'web.app',
     'usercontent.goog',
-    'scf.usercontent.goog'
+    'scf.usercontent.goog',
+    'run.app',
+    'goog'
   ];
   
   // Check if current domain matches any authorized pattern

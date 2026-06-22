@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, GraduationCap, Trophy, Newspaper, Users, Phone, Home, ShieldCheck, MoreHorizontal, MessageSquare, Mail, Check, AlertCircle, Loader2 } from 'lucide-react';
+import { X, GraduationCap, Trophy, Newspaper, Users, Phone, Home, ShieldCheck, MoreHorizontal, MessageSquare, Mail, Check, AlertCircle, Loader2, Video } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { SCHOOL_INFO } from '@/src/constants';
 import FeedbackModal from '@/src/components/FeedbackModal';
@@ -10,6 +10,7 @@ const navLinks = [
   { name: 'Home', path: '/', icon: Home },
   { name: 'About', path: '/about', icon: GraduationCap },
   { name: 'Academics', path: '/academics', icon: ShieldCheck },
+  { name: 'Gallery', path: '/gallery', icon: Video },
   { name: 'Leadership', path: '/leadership', icon: Users },
   { name: 'News', path: '/news', icon: Newspaper },
   { name: 'Alumni', path: '/alumni', icon: Users },

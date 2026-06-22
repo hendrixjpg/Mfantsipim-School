@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, Trophy, Users, GraduationCap, Loader2, CheckCircle2, Star, Shield, Home as HomeIcon, Linkedin } from 'lucide-react';
+import { ArrowRight, Trophy, Users, GraduationCap, Loader2, CheckCircle2, Star, Shield, Home as HomeIcon, Linkedin, Video, Play, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SCHOOL_INFO } from '@/src/constants';
 import Achievements from '@/src/components/Achievements';
@@ -10,6 +10,7 @@ import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestor
 import { db } from '@/src/firebase';
 import { NewsItem } from '@/src/types';
 import { format } from 'date-fns';
+import NewsletterSignup from '@/src/components/NewsletterSignup';
 
 // Featured old boys from Mfantsipim
 const FEATURED_ALUMNI = [
@@ -260,6 +261,105 @@ export default function Home() {
         </div>
       </section>
 
+      {/* MFS Media Team TikTok Showcase */}
+      <section className="section-padding overflow-hidden">
+        <div className="container-custom">
+          <div className="flex flex-col lg:flex-row items-center justify-between pb-12 border-b border-[var(--border)] gap-8">
+            <div className="max-w-2xl text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-600/10 text-red-600 rounded-full text-[10px] font-black uppercase tracking-[0.2em] mb-4 border border-red-600/20">
+                <Video size={10} className="animate-pulse" />
+                Kwabotwe Buzz // TikTok Hub
+              </div>
+              <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight mb-4">
+                MFS <span className="text-red-600">Media Arena</span>
+              </h2>
+              <p className="text-[var(--muted-foreground)]">
+                Relive the electric energy of our <b>National Science & Maths Quiz (NSMQ)</b> crowd chants, prestigious Cape Coast cadet corps parades, and Sunday Methodist choral anthems from the official student media team.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                to="/gallery" 
+                className="btn-primary flex items-center gap-2 font-black uppercase tracking-widest text-[10px]"
+              >
+                Explore Full Gallery <ArrowRight size={14} />
+              </Link>
+              <a 
+                href="https://www.tiktok.com/@mfsmediateam" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="btn-secondary flex items-center gap-2 font-black uppercase tracking-widest text-[10px]"
+              >
+                TikTok Profile <ExternalLink size={12} className="text-red-500" />
+              </a>
+            </div>
+          </div>
+
+          {/* Quick Showcase Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+            {[
+              {
+                title: "NSMQ - The Kwabotwe Chant",
+                desc: "Calculating under high stakes accompanied by standard traditional victory chants. 12.4K likes.",
+                category: "NSMQ",
+                image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=800&auto=format&fit=crop"
+              },
+              {
+                title: "Cadet Guard of Honour",
+                desc: "Prestigious Cadet Corps march with maximum discipline on the speech day parade. 8.5K likes.",
+                category: "Cadet Parade",
+                image: "https://images.unsplash.com/photo-1544717305-2782549b5136?q=80&w=800&auto=format&fit=crop"
+              },
+              {
+                title: "Choral Assemblies & Hymns",
+                desc: "Soul-stirring rich Methodist choral harmonies executed by the school congregation. 7.2K likes.",
+                category: "School Choir",
+                image: "https://images.unsplash.com/photo-1511192336575-5a79af67a629?q=80&w=800&auto=format&fit=crop"
+              }
+            ].map((media, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="group relative h-72 rounded-[32px] overflow-hidden border border-[var(--border)] shadow-sm hover:shadow-lg transition-all"
+              >
+                <img 
+                  src={media.image} 
+                  alt={media.title}
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
+                
+                {/* Visual Trigger */}
+                <div className="absolute top-4 left-4">
+                  <span className="bg-red-600 text-white px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest">
+                    {media.category}
+                  </span>
+                </div>
+
+                <div className="absolute bottom-6 left-6 right-6 text-white text-left">
+                  <h3 className="text-base font-black uppercase tracking-tight leading-tight mb-2 group-hover:text-red-500 transition-colors">
+                    {media.title}
+                  </h3>
+                  <p className="text-zinc-300 text-[11px] leading-relaxed mb-4 line-clamp-2">
+                    {media.desc}
+                  </p>
+                  <Link 
+                    to="/gallery" 
+                    className="inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-red-500 hover:text-white transition-colors"
+                  >
+                    Watch Highlight <Play size={10} fill="currentColor" />
+                  </Link>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* News Preview */}
       <section className="section-padding">
         <div className="container-custom">
@@ -327,6 +427,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <NewsletterSignup />
     </div>
   );
 }

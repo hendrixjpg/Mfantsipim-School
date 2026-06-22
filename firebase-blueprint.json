@@ -50,6 +50,35 @@
         "graduationYear": { "type": "string" }
       },
       "required": ["uid", "email", "role"]
+    },
+    "MediaGallerySubmission": {
+      "title": "Media Gallery Submission",
+      "description": "A suggested video link from TikTok for the gallery",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Title of the video highlight" },
+        "description": { "type": "string", "description": "Description of the highlight" },
+        "date": { "type": "string", "format": "date", "description": "Submission date" },
+        "category": { "type": "string", "enum": ["NSMQ", "Cadet/Speech Day", "Sports/Chants", "Choir/Hymns", "Campus Life"] },
+        "tiktokUrl": { "type": "string", "description": "TikTok share URL" },
+        "thumbnailUrl": { "type": "string", "description": "Cover background thumbnail URL" },
+        "likes": { "type": "integer" },
+        "comments": { "type": "integer" },
+        "author": { "type": "string", "description": "Submitter credit name" }
+      },
+      "required": ["title", "category", "tiktokUrl", "thumbnailUrl", "likes", "comments", "author"]
+    },
+    "NewsletterSubscriber": {
+      "title": "Newsletter Subscriber",
+      "description": "Information about a user subscribed to the newsletter",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email", "description": "Subscriber's email address" },
+        "subscribedAt": { "type": "string", "format": "date-time", "description": "ISO timestamp of when they subscribed" },
+        "source": { "type": "string", "description": "Webpage source of subscription" },
+        "active": { "type": "boolean", "description": "Subscription status" }
+      },
+      "required": ["email", "subscribedAt"]
     }
   },
   "firestore": {
@@ -68,6 +97,14 @@
     "/users": {
       "schema": { "$ref": "UserProfile" },
       "description": "Collection of user profiles"
+    },
+    "/media_gallery_submissions": {
+      "schema": { "$ref": "MediaGallerySubmission" },
+      "description": "Collection of visitor-submitted media gallery items from TikTok"
+    },
+    "/newsletter_subscribers": {
+      "schema": { "$ref": "NewsletterSubscriber" },
+      "description": "Collection of newsletter subscriber emails"
     }
   }
 }

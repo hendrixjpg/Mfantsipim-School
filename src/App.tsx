@@ -5,6 +5,7 @@ import { Navbar, Footer, BottomNav } from '@/src/components/Layout';
 import Home from '@/src/pages/Home';
 import About from '@/src/pages/About';
 import Academics from '@/src/pages/Academics';
+import Gallery from '@/src/pages/Gallery';
 import News from '@/src/pages/News';
 import NewsDetail from '@/src/pages/NewsDetail';
 import Alumni from '@/src/pages/Alumni';
@@ -56,6 +57,7 @@ export default function App() {
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
               <Route path="/academics" element={<Academics />} />
+              <Route path="/gallery" element={<Gallery />} />
               <Route path="/leadership" element={<Leadership />} />
               <Route path="/news" element={<News />} />
               <Route path="/news/:id" element={<NewsDetail />} />

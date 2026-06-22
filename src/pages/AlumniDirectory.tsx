@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Search, Filter, User, GraduationCap, Briefcase, MapPin, Linkedin, ExternalLink, Loader2, X, CheckCircle2, AlertCircle, LogIn, Network, ShieldCheck, Star } from 'lucide-react';
 import { collection, onSnapshot, query, where, doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/src/firebase';
+import Login from '@/src/components/Login';
+import { AlumniSkeleton } from '@/src/components/Skeletons';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, User as FirebaseUser } from 'firebase/auth';
 import { AlumniProfile } from '@/src/types';
 import { cn } from '@/src/lib/utils';
@@ -239,12 +241,11 @@ export default function AlumniDirectory() {
               </button>
             ) : (
               <button
-                onClick={handleLogin}
-                disabled={isLoggingIn}
-                className="w-full py-4 bg-red-600 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl hover:bg-red-700 transition-all flex items-center justify-center space-x-3 disabled:opacity-50 shadow-lg shadow-red-600/20"
+                onClick={() => setShowProfileModal(true)}
+                className="w-full py-4 bg-red-600 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl hover:bg-red-700 transition-all flex items-center justify-center space-x-3 shadow-lg shadow-red-600/20"
               >
-                {isLoggingIn ? <Loader2 className="animate-spin" size={18} /> : <LogIn size={18} />}
-                <span>{isLoggingIn ? "AUTHENTICATING..." : "INITIATE_LOGIN"}</span>
+                <LogIn size={18} />
+                <span>INITIATE_LOGIN</span>
               </button>
             )}
             {/* HUD corners */}
@@ -294,12 +295,7 @@ export default function AlumniDirectory() {
       {/* Directory Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-32">
-            <div className="w-24 h-24 bg-white border border-zinc-200 rounded-3xl flex items-center justify-center mb-8 shadow-xl">
-              <Loader2 className="animate-spin text-red-600" size={48} />
-            </div>
-            <p className="text-zinc-400 font-mono font-black uppercase tracking-[0.4em] text-xs">Syncing_Directory_Stream...</p>
-          </div>
+          <AlumniSkeleton />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {filteredAlumni.map((person, i) => (
@@ -439,23 +435,13 @@ export default function AlumniDirectory() {
                 </button>
               </div>
 
-              <form onSubmit={handleUpdateProfile} className="p-10 space-y-8 max-h-[70vh] overflow-y-auto scrollbar-hide relative z-10">
+              <div className="p-10 max-h-[70vh] overflow-y-auto scrollbar-hide relative z-10">
                 {!user ? (
-                  <div className="p-12 rounded-[32px] bg-red-50 border border-red-100 text-center">
-                    <AlertCircle className="text-red-600 mx-auto mb-6" size={48} />
-                    <p className="text-red-600 text-xs font-mono font-black uppercase tracking-[0.3em] mb-10">
-                      AUTHENTICATION_REQUIRED // STATUS_LOCKED
-                    </p>
-                    <button
-                      type="button"
-                      onClick={handleLogin}
-                      className="px-10 py-5 bg-red-600 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-2xl hover:bg-red-700 transition-all shadow-lg shadow-red-600/20"
-                    >
-                      Sign_In_with_Google
-                    </button>
+                  <div className="max-w-md mx-auto">
+                    <Login />
                   </div>
                 ) : (
-                  <>
+                  <form onSubmit={handleUpdateProfile} className="space-y-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] ml-2">Display_Name</label>
@@ -549,9 +535,9 @@ export default function AlumniDirectory() {
                       <span>{isSubmitting ? "SYNCING_DATA..." : "COMMIT_PROFILE_CHANGES"}</span>
                     </button>
                   </div>
-                </>
+                  </form>
                 )}
-              </form>
+              </div>
               {/* HUD corners */}
               <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-zinc-100 rounded-tl-[48px]" />
               <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-zinc-100 rounded-br-[48px]" />

@@ -9,6 +9,7 @@ import { NewsItem, UserProfile } from '@/src/types';
 import { cn } from '@/src/lib/utils';
 import { format } from 'date-fns';
 import ShareModal from '@/src/components/ShareModal';
+import { NewsSkeleton } from '@/src/components/Skeletons';
 
 export default function News() {
   const [news, setNews] = React.useState<NewsItem[]>([]);
@@ -177,10 +178,7 @@ export default function News() {
       {/* News Grid */}
       <section className="container-custom py-16">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-32">
-            <Loader2 className="animate-spin text-red-600 mb-4" size={40} />
-            <p className="text-[var(--muted-foreground)] font-bold uppercase tracking-widest text-xs">Loading updates...</p>
-          </div>
+          <NewsSkeleton />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredNews.map((item, i) => (
