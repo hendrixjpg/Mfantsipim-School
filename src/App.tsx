@@ -11,7 +11,6 @@ import NewsDetail from '@/src/pages/NewsDetail';
 import Alumni from '@/src/pages/Alumni';
 import AlumniDirectory from '@/src/pages/AlumniDirectory';
 import Contact from '@/src/pages/Contact';
-import Admin from '@/src/pages/Admin';
 import Leadership from '@/src/pages/Leadership';
 import Login from '@/src/components/Login';
 import { debugFirebase } from '@/src/services/firebaseDebug';
@@ -64,7 +63,6 @@ export default function App() {
               <Route path="/alumni" element={<Alumni />} />
               <Route path="/alumni/directory" element={<AlumniDirectory />} />
               <Route path="/contact" element={<Contact />} />
-              <Route path="/admin" element={<Admin />} />
               <Route path="/login" element={<Login />} />
               <Route path="/admissions" element={<Contact />} />
             </Routes>

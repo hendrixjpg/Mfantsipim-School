@@ -66,14 +66,6 @@ export function Navbar() {
                 {link.name}
               </Link>
             ))}
-            <div className="w-[1px] h-6 bg-[var(--border)] mx-4" />
-            <Link
-              to="/admin"
-              className="flex items-center gap-2 px-5 py-2.5 bg-[var(--muted)] text-[var(--foreground)] rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[var(--border)] transition-all"
-            >
-              <ShieldCheck size={14} className="text-red-600" />
-              Portal
-            </Link>
           </div>
         </div>
       </div>
@@ -166,14 +158,6 @@ export function BottomNav() {
                   <MessageSquare size={18} />
                   <span className="text-xs font-bold uppercase tracking-widest">Feedback</span>
                 </button>
-                <Link
-                  to="/admin"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center space-x-3 p-4 rounded-xl bg-red-600/10 text-red-600 border border-red-600/20 col-span-2"
-                >
-                  <ShieldCheck size={18} />
-                  <span className="text-xs font-bold uppercase tracking-widest">Admin Portal</span>
-                </Link>
               </div>
             </motion.div>
           </>

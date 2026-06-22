@@ -148,6 +148,8 @@ export default function Login() {
   }
 
   // Login/Signup Form
+  const isIframe = typeof window !== 'undefined' && window.self !== window.top;
+
   return (
     <div className="max-w-md mx-auto my-12 p-8 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl" id="auth-main-card">
       <div className="text-center mb-8">
@@ -158,6 +160,22 @@ export default function Login() {
           {isLogin ? 'Sign in to connect with alumni and updates' : 'Join our official school network today'}
         </p>
       </div>
+
+      {isIframe && (
+        <div className="mb-6 p-4 bg-red-50/50 border border-red-150 rounded-xl text-left" id="auth-iframe-helper">
+          <p className="text-[11px] font-semibold text-red-850 leading-relaxed mb-3">
+            ℹ️ <strong>Iframe Warning:</strong> Browsers block Google Auth popups inside sandboxed previews. Please open the app in a new tab to sign in, or use Email/Password below.
+          </p>
+          <a
+            href={window.location.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center w-full py-2.5 px-3 text-xs font-black uppercase tracking-wider text-center text-red-600 bg-white border border-red-200 hover:border-red-350 rounded-xl hover:bg-zinc-50 transition active:scale-98"
+          >
+            🚀 Open App in New Tab
+          </a>
+        </div>
+      )}
       
       {error && (
         <div className="p-4 mb-6 bg-red-50 border border-red-200 rounded-xl flex gap-3 text-red-800" id="auth-error-alert">

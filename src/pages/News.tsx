@@ -1,11 +1,10 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Newspaper, Calendar, User, ArrowRight, Search, Loader2, Trash2, Share2, Pencil, X } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Newspaper, Calendar, User, ArrowRight, Search, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { collection, onSnapshot, query, orderBy, doc, deleteDoc, getDoc, updateDoc } from 'firebase/firestore';
-import { auth, db } from '@/src/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { NewsItem, UserProfile } from '@/src/types';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db } from '@/src/firebase';
+import { NewsItem } from '@/src/types';
 import { cn } from '@/src/lib/utils';
 import { format } from 'date-fns';
 import ShareModal from '@/src/components/ShareModal';
@@ -16,46 +15,11 @@ export default function News() {
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [activeCategory, setActiveCategory] = React.useState('All');
-  const [isAdmin, setIsAdmin] = React.useState(false);
   const [sharingArticle, setSharingArticle] = React.useState<NewsItem | null>(null);
-  
-  // States for news editing
-  const [editingArticle, setEditingArticle] = React.useState<NewsItem | null>(null);
-  const [editTitle, setEditTitle] = React.useState('');
-  const [editContent, setEditContent] = React.useState('');
-  const [editCategory, setEditCategory] = React.useState<NewsItem['category']>('General');
-  const [editImageUrl, setEditImageUrl] = React.useState('');
-  const [isUpdating, setIsUpdating] = React.useState(false);
 
   const categories = ['All', 'Academic', 'Sports', 'Alumni', 'Innovation', 'General'];
 
   React.useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const docRef = doc(db, 'users', user.uid);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            const profile = docSnap.data() as UserProfile;
-            setIsAdmin(profile.role === 'admin');
-          } else if (user.email === "seldogbey234@gmail.com") {
-            setIsAdmin(true);
-          } else {
-            setIsAdmin(false);
-          }
-        } catch (error) {
-          console.error("Error checking admin profile state:", error);
-          if (user.email === "seldogbey234@gmail.com") {
-            setIsAdmin(true);
-          } else {
-            setIsAdmin(false);
-          }
-        }
-      } else {
-        setIsAdmin(false);
-      }
-    });
-
     const q = query(collection(db, 'news'), orderBy('date', 'desc'));
     const unsubscribeNews = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NewsItem));
@@ -67,52 +31,9 @@ export default function News() {
     });
 
     return () => {
-      unsubscribeAuth();
       unsubscribeNews();
     };
-  }, [auth, db]);
-
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (confirm('Are you sure you want to delete this article?')) {
-      try {
-        await deleteDoc(doc(db, 'news', id));
-      } catch (error) {
-        console.error("Delete error:", error);
-      }
-    }
-  };
-
-  const startEdit = (e: React.MouseEvent, item: NewsItem) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setEditingArticle(item);
-    setEditTitle(item.title);
-    setEditContent(item.content);
-    setEditCategory(item.category);
-    setEditImageUrl(item.imageUrl || '');
-  };
-
-  const handleUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingArticle) return;
-    setIsUpdating(true);
-    try {
-      const docRef = doc(db, 'news', editingArticle.id);
-      await updateDoc(docRef, {
-        title: editTitle,
-        content: editContent,
-        category: editCategory,
-        imageUrl: editImageUrl,
-      });
-      setEditingArticle(null);
-    } catch (error) {
-      console.error("Update error:", error);
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  }, [db]);
 
   const filteredNews = news.filter(item => {
     const matchesSearch = item.title.toLowerCase().includes(searchTerm.toLowerCase());
@@ -190,26 +111,6 @@ export default function News() {
                 transition={{ delay: i * 0.05 }}
                 className="card-base overflow-hidden group flex flex-col h-full card-hover relative"
               >
-                {/* Discreet Admin Controls in top-right corner on hover */}
-                {isAdmin && (
-                  <div className="absolute top-4 right-4 z-30 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-[-4px] group-hover:translate-y-0">
-                    <button
-                      onClick={(e) => startEdit(e, item)}
-                      className="p-2.5 bg-white/95 text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-xl shadow-lg border border-amber-100 backdrop-blur transition-all flex items-center justify-center cursor-pointer"
-                      title="Edit Article"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      onClick={(e) => handleDelete(e, item.id!)}
-                      className="p-2.5 bg-white/95 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl shadow-lg border border-red-100 backdrop-blur transition-all flex items-center justify-center cursor-pointer"
-                      title="Delete Article"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                )}
-
                 <Link to={`/news/${item.id}`} className="flex flex-col h-full">
                   {item.imageUrl && (
                     <div className="aspect-video overflow-hidden relative">
@@ -262,15 +163,6 @@ export default function News() {
                         >
                           <Share2 size={18} />
                         </button>
-                        {isAdmin && (
-                          <button
-                            onClick={(e) => handleDelete(e, item.id!)}
-                            className="p-2 text-[var(--muted-foreground)] hover:text-red-600 transition-colors"
-                            title="Delete Article"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -295,127 +187,6 @@ export default function News() {
         title={sharingArticle?.title || ''}
         url={sharingArticle ? `${window.location.origin}/news/${sharingArticle.id}` : ''}
       />
-
-      {/* Edit Article Modal */}
-      <AnimatePresence>
-        {editingArticle && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setEditingArticle(null)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            />
-
-            {/* Modal Body */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: 'spring', duration: 0.5 }}
-              className="relative w-full max-w-xl bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl p-8 z-10 overflow-hidden"
-            >
-              <div className="flex items-center justify-between mb-6 pb-4 border-b border-[var(--border)]">
-                <div>
-                  <h3 className="text-xl font-black uppercase tracking-tight text-[var(--foreground)]">Edit Article</h3>
-                  <p className="text-xs text-[var(--muted-foreground)]">Modify school update details below</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setEditingArticle(null)}
-                  className="p-2 text-[var(--muted-foreground)] hover:text-[var(--foreground)] rounded-lg transition-colors bg-[var(--muted)]"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-
-              <form onSubmit={handleUpdate} className="space-y-5">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-2">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    className="w-full bg-[var(--muted)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--foreground)] focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all outline-none"
-                    placeholder="Enter article title"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-2">
-                    Category
-                  </label>
-                  <select
-                    value={editCategory}
-                    onChange={(e) => setEditCategory(e.target.value as any)}
-                    className="w-full bg-[var(--muted)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--foreground)] focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all outline-none"
-                  >
-                    {['Academic', 'Sports', 'Alumni', 'Innovation', 'General'].map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-2">
-                    Image URL
-                  </label>
-                  <input
-                    type="url"
-                    value={editImageUrl}
-                    onChange={(e) => setEditImageUrl(e.target.value)}
-                    className="w-full bg-[var(--muted)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--foreground)] focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all outline-none"
-                    placeholder="https://images.unsplash.com/... (optional)"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-[var(--muted-foreground)] mb-2">
-                    Content
-                  </label>
-                  <textarea
-                    required
-                    rows={6}
-                    value={editContent}
-                    onChange={(e) => setEditContent(e.target.value)}
-                    className="w-full bg-[var(--muted)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--foreground)] focus:ring-2 focus:ring-red-600 focus:border-transparent transition-all outline-none resize-none"
-                    placeholder="Write article body content here..."
-                  />
-                </div>
-
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--border)]">
-                  <button
-                    type="button"
-                    onClick={() => setEditingArticle(null)}
-                    className="px-5 py-2.5 bg-[var(--muted)] hover:bg-[var(--border)] text-[var(--foreground)] rounded-xl text-xs font-bold uppercase tracking-widest transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isUpdating}
-                    className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors flex items-center gap-2"
-                  >
-                    {isUpdating ? (
-                      <>
-                        <Loader2 className="animate-spin" size={14} />
-                        Updating...
-                      </>
-                    ) : (
-                      'Save Changes'
-                    )}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

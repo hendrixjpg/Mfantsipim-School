@@ -1,11 +1,10 @@
 import React from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Calendar, User, ArrowLeft, Loader2, Newspaper, Share2, Trash2 } from 'lucide-react';
-import { doc, getDoc, deleteDoc } from 'firebase/firestore';
-import { auth, db } from '@/src/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { NewsItem, UserProfile } from '@/src/types';
+import { Calendar, User, ArrowLeft, Loader2, Newspaper, Share2 } from 'lucide-react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/src/firebase';
+import { NewsItem } from '@/src/types';
 import { format } from 'date-fns';
 import ReactMarkdown from 'react-markdown';
 import ShareModal from '@/src/components/ShareModal';
@@ -15,36 +14,9 @@ export default function NewsDetail() {
   const navigate = useNavigate();
   const [news, setNews] = React.useState<NewsItem | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const [isAdmin, setIsAdmin] = React.useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
 
   React.useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const docRef = doc(db, 'users', user.uid);
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            const profile = docSnap.data() as UserProfile;
-            setIsAdmin(profile.role === 'admin');
-          } else if (user.email === "seldogbey234@gmail.com") {
-            setIsAdmin(true);
-          } else {
-            setIsAdmin(false);
-          }
-        } catch (error) {
-          console.error("Error checking admin profile state in detail:", error);
-          if (user.email === "seldogbey234@gmail.com") {
-            setIsAdmin(true);
-          } else {
-            setIsAdmin(false);
-          }
-        }
-      } else {
-        setIsAdmin(false);
-      }
-    });
-
     const fetchNews = async () => {
       if (!id) return;
       try {
@@ -60,21 +32,7 @@ export default function NewsDetail() {
       }
     };
     fetchNews();
-
-    return () => unsubscribeAuth();
-  }, [id, auth, db]);
-
-  const handleDelete = async () => {
-    if (!id) return;
-    if (confirm('Are you sure you want to delete this article?')) {
-      try {
-        await deleteDoc(doc(db, 'news', id));
-        navigate('/news');
-      } catch (error) {
-        console.error("Delete error:", error);
-      }
-    }
-  };
+  }, [id, db]);
 
   if (loading) {
     return (
@@ -133,14 +91,6 @@ export default function NewsDetail() {
             >
               <Share2 size={16} className="mr-2" /> Share
             </button>
-            {isAdmin && (
-              <button
-                onClick={handleDelete}
-                className="flex items-center text-red-600 hover:text-red-500 transition-colors"
-              >
-                <Trash2 size={16} className="mr-2" /> Delete
-              </button>
-            )}
           </div>
         </motion.div>
 
