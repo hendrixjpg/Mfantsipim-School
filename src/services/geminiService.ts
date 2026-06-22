@@ -16,7 +16,14 @@ Keep responses concise and formatted with markdown if necessary.
 `;
 
 export async function getChatResponse(messages: ChatMessage[]) {
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+  const ai = new GoogleGenAI({ 
+    apiKey: process.env.GEMINI_API_KEY || "",
+    httpOptions: {
+      headers: {
+        'User-Agent': 'aistudio-build',
+      }
+    }
+  });
   
   const history = messages.slice(0, -1).map(m => ({
     role: m.role === 'user' ? 'user' : 'model',
@@ -24,7 +31,7 @@ export async function getChatResponse(messages: ChatMessage[]) {
   }));
 
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
+    model: "gemini-3.5-flash",
     contents: [
       ...history,
       { role: 'user', parts: [{ text: messages[messages.length - 1].text }] }
@@ -34,8 +41,28 @@ export async function getChatResponse(messages: ChatMessage[]) {
       temperature: 0.7,
       topP: 0.95,
       topK: 40,
+      tools: [{ googleSearch: {} }],
     }
   });
 
-  return response.text || "I'm sorry, I couldn't generate a response. Please try again.";
+  // Extract grounding metadata chunks for search sources
+  const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
+  const sources = chunks
+    ? chunks
+        .map((chunk: any) => {
+          if (chunk.web) {
+            return {
+              title: chunk.web.title || "Web Source",
+              uri: chunk.web.uri,
+            };
+          }
+          return null;
+        })
+        .filter((src: any): src is { title: string; uri: string } => src !== null)
+    : [];
+
+  return {
+    text: response.text || "I'm sorry, I couldn't generate a response. Please try again.",
+    sources,
+  };
 }

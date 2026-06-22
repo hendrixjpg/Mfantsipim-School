@@ -45,4 +45,5 @@ export interface AlumniProfile extends UserProfile {
 export interface ChatMessage {
   role: 'user' | 'model';
   text: string;
+  sources?: { title: string; uri: string }[];
 }

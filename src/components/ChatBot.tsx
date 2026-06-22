@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MessageCircle, X, Send, Bot, User, Loader2 } from 'lucide-react';
-import { getChatResponse } from '@/src/services/geminiService';
+import { MessageCircle, X, Send, Bot, User, Loader2, ExternalLink } from 'lucide-react';
 import { ChatMessage } from '@/src/types';
 import { cn } from '@/src/lib/utils';
 import ReactMarkdown from 'react-markdown';
@@ -31,8 +30,20 @@ export default function ChatBot() {
     setIsLoading(true);
 
     try {
-      const response = await getChatResponse(newMessages);
-      setMessages([...newMessages, { role: 'model', text: response }]);
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch chat response');
+      }
+
+      const data = await response.json();
+      setMessages([...newMessages, { role: 'model', text: data.text, sources: data.sources }]);
     } catch (error) {
       console.error('Chat error:', error);
       setMessages([...newMessages, { role: 'model', text: 'Sorry, I encountered an error. Please try again later.' }]);
@@ -93,7 +104,7 @@ export default function ChatBot() {
                     {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
                   </div>
                   <div className={cn(
-                    "max-w-[80%] p-3 rounded-2xl text-sm leading-relaxed",
+                    "max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed",
                     msg.role === 'user'
                       ? "bg-red-600 text-white rounded-tr-none"
                       : "bg-white/5 text-gray-300 rounded-tl-none border border-white/5"
@@ -101,6 +112,28 @@ export default function ChatBot() {
                     <div className="markdown-body">
                       <ReactMarkdown>{msg.text}</ReactMarkdown>
                     </div>
+                    {msg.role === 'model' && msg.sources && msg.sources.length > 0 && (
+                      <div className="mt-3 pt-2.5 border-t border-white/10">
+                        <div className="flex items-center gap-1 mb-1.5">
+                          <span className="text-[9px] uppercase font-bold tracking-widest text-zinc-500">Google Search Sources:</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {msg.sources.map((src, idx) => (
+                            <a
+                              key={idx}
+                              href={src.uri}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-[10px] bg-white/5 border border-white/10 hover:bg-white/10 text-white hover:text-red-400 rounded-lg px-2 py-1 transition-all max-w-full truncate"
+                              title={src.title}
+                            >
+                              <span className="truncate max-w-[120px]">{src.title}</span>
+                              <ExternalLink size={10} className="flex-shrink-0 opacity-70" />
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

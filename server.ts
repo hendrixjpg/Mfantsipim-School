@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
+import { getChatResponse } from "./src/services/geminiService";
 
 async function startServer() {
   const app = express();
@@ -25,6 +26,26 @@ async function startServer() {
       res.json(data);
     } catch (error) {
       console.error("TikTok oembed proxy error:", error);
+      res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+    }
+  });
+
+  // 1.5. Enable JSON parsing for api endpoints
+  app.use(express.json());
+
+  // 1.6. Gemini Chatbot with Google Search Grounding
+  app.post("/api/chat", async (req, res) => {
+    const { messages } = req.body;
+    if (!messages || !Array.isArray(messages)) {
+      res.status(400).json({ error: "Missing or invalid messages parameter." });
+      return;
+    }
+
+    try {
+      const result = await getChatResponse(messages);
+      res.json(result);
+    } catch (error) {
+      console.error("Gemini chat error:", error);
       res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
     }
   });
