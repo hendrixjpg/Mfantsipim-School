@@ -15,6 +15,7 @@ import Leadership from '@/src/pages/Leadership';
 import Login from '@/src/components/Login';
 import { debugFirebase } from '@/src/services/firebaseDebug';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 function PageTransition({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -71,6 +72,7 @@ export default function App() {
         <Footer />
         <BottomNav />
         <Analytics />
+        <SpeedInsights />
       </div>
     </Router>
   );
